@@ -43,6 +43,7 @@ Frontend website
 GitHub Actions CI/CD
 
 ## Project Structure
+```text
 tibia-guild-analytics/
 ├── ingestion/
 ├── backend/
@@ -50,6 +51,7 @@ tibia-guild-analytics/
 ├── frontend/
 ├── infra/
 └── .github/workflows/
+```
 
 ## Status
 Project initialized. First milestone: extract guild roster and save the first raw JSON snapshot.
