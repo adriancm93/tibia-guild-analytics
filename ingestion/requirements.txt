@@ -61,7 +61,6 @@ pandocfilters==1.5.1
 parso==0.8.7
 pexpect==4.9.0
 platformdirs==4.9.6
-polars==1.40.1
 polars-runtime-32==1.40.1
 prometheus_client==0.25.0
 prompt_toolkit==3.0.52
@@ -99,3 +98,8 @@ webcolors==25.10.0
 webencodings==0.5.1
 websocket-client==1.9.0
 widgetsnbextension==4.0.15
+requests==2.32.3
+python-dotenv==1.0.1
+polars==1.8.2
+sqlalchemy==2.0.35
+psycopg[binary]
