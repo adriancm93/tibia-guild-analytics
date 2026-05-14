@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tibia_guild_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tibia_analytics
+      POSTGRES_USER: tibia_user
+      POSTGRES_PASSWORD: tibia_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - tibia_postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tibia_user -d tibia_analytics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  tibia_postgres_data:
