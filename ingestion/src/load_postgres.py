@@ -176,6 +176,13 @@ def insert_member_snapshot_rows(
             :status,
             :joined
         )
+        ON CONFLICT (
+            guild_name,
+            world,
+            character_name,
+            extracted_at_utc
+    )
+    DO NOTHING
         """
     )
 
