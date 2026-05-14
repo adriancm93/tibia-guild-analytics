@@ -1,7 +1,22 @@
--- Phase 3D
--- Create analytics views that compare the latest guild snapshot to the previous snapshot.
+-- ============================================================
+-- 005_create_snapshot_comparison_views.sql
+-- Phase 4
+-- Create analytics views that compare the latest guild snapshot
+-- to the previous snapshot.
+-- ============================================================
 
-CREATE OR REPLACE VIEW analytics_snapshot_pairs AS
+CREATE SCHEMA IF NOT EXISTS analytics;
+
+-- ------------------------------------------------------------
+-- View: analytics.snapshot_pairs
+--
+-- Purpose:
+-- Ranks available guild snapshots from newest to oldest.
+-- snapshot_rank = 1 is the latest snapshot.
+-- snapshot_rank = 2 is the previous snapshot.
+-- ------------------------------------------------------------
+
+CREATE OR REPLACE VIEW analytics.snapshot_pairs AS
 WITH snapshot_rankings AS (
     SELECT
         extracted_at_utc,
@@ -14,18 +29,27 @@ WITH snapshot_rankings AS (
         FROM stg_guild_member_snapshot
     ) snapshots
 )
+
 SELECT
     extracted_at_utc,
     snapshot_rank
 FROM snapshot_rankings;
 
 
-CREATE OR REPLACE VIEW analytics_character_level_changes AS
+-- ------------------------------------------------------------
+-- View: analytics.character_level_changes
+--
+-- Purpose:
+-- Shows characters whose level changed between the latest
+-- snapshot and the previous snapshot.
+-- ------------------------------------------------------------
+
+CREATE OR REPLACE VIEW analytics.character_level_changes AS
 WITH latest AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 1
 ),
@@ -34,10 +58,11 @@ previous AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 2
 )
+
 SELECT
     latest.guild_name,
     latest.world,
@@ -57,12 +82,20 @@ JOIN previous
 WHERE latest.level <> previous.level;
 
 
-CREATE OR REPLACE VIEW analytics_guild_joins AS
+-- ------------------------------------------------------------
+-- View: analytics.guild_joins
+--
+-- Purpose:
+-- Shows characters who are present in the latest snapshot
+-- but were not present in the previous snapshot.
+-- ------------------------------------------------------------
+
+CREATE OR REPLACE VIEW analytics.guild_joins AS
 WITH latest AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 1
 ),
@@ -71,10 +104,11 @@ previous AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 2
 )
+
 SELECT
     latest.guild_name,
     latest.world,
@@ -93,12 +127,20 @@ LEFT JOIN previous
 WHERE previous.character_name IS NULL;
 
 
-CREATE OR REPLACE VIEW analytics_guild_leaves AS
+-- ------------------------------------------------------------
+-- View: analytics.guild_leaves
+--
+-- Purpose:
+-- Shows characters who were present in the previous snapshot
+-- but are no longer present in the latest snapshot.
+-- ------------------------------------------------------------
+
+CREATE OR REPLACE VIEW analytics.guild_leaves AS
 WITH latest AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 1
 ),
@@ -107,10 +149,11 @@ previous AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 2
 )
+
 SELECT
     previous.guild_name,
     previous.world,
@@ -129,12 +172,20 @@ LEFT JOIN latest
 WHERE latest.character_name IS NULL;
 
 
-CREATE OR REPLACE VIEW analytics_rank_changes AS
+-- ------------------------------------------------------------
+-- View: analytics.rank_changes
+--
+-- Purpose:
+-- Shows characters whose guild rank changed between the latest
+-- snapshot and the previous snapshot.
+-- ------------------------------------------------------------
+
+CREATE OR REPLACE VIEW analytics.rank_changes AS
 WITH latest AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 1
 ),
@@ -143,10 +194,11 @@ previous AS (
     SELECT
         s.*
     FROM stg_guild_member_snapshot s
-    JOIN analytics_snapshot_pairs p
+    JOIN analytics.snapshot_pairs p
         ON s.extracted_at_utc = p.extracted_at_utc
     WHERE p.snapshot_rank = 2
 )
+
 SELECT
     latest.guild_name,
     latest.world,
