@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tibia Guild Analytics</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div>
+            <p class="eyebrow">Tibia Guild Analytics</p>
+            <h1>Black Clover Guild Dashboard</h1>
+            <p class="subtitle">
+                Snapshot-based analytics for guild movement, level progression, joins, leaves, and rank changes.
+            </p>
+        </div>
+    </header>
+
+    <main class="page-container">
+        <section class="status-card">
+            <div>
+                <h2>API Status</h2>
+                <p id="api-status">Checking backend connection...</p>
+            </div>
+        </section>
+
+        <section class="snapshot-section">
+            <h2>Snapshot Window</h2>
+            <div class="snapshot-grid">
+                <div class="card">
+                    <p class="card-label">Latest Snapshot</p>
+                    <p id="latest-snapshot" class="card-value">Loading...</p>
+                </div>
+                <div class="card">
+                    <p class="card-label">Previous Snapshot</p>
+                    <p id="previous-snapshot" class="card-value">Loading...</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="summary-section">
+            <h2>Change Summary</h2>
+            <div class="summary-grid">
+                <div class="card metric-card">
+                    <p class="card-label">Level Changes</p>
+                    <p id="level-changes-count" class="metric-value">0</p>
+                </div>
+                <div class="card metric-card">
+                    <p class="card-label">Guild Joins</p>
+                    <p id="guild-joins-count" class="metric-value">0</p>
+                </div>
+                <div class="card metric-card">
+                    <p class="card-label">Guild Leaves</p>
+                    <p id="guild-leaves-count" class="metric-value">0</p>
+                </div>
+                <div class="card metric-card">
+                    <p class="card-label">Rank Changes</p>
+                    <p id="rank-changes-count" class="metric-value">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <div class="section-header">
+                <div>
+                    <h2>Character Level Changes</h2>
+                    <p>Characters whose level changed between the latest two snapshots.</p>
+                </div>
+                <button id="refresh-button">Refresh Data</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Character</th>
+                            <th>Vocation</th>
+                            <th>Guild Rank</th>
+                            <th>Previous Level</th>
+                            <th>Current Level</th>
+                            <th>Level Gain</th>
+                        </tr>
+                    </thead>
+                    <tbody id="level-changes-table">
+                        <tr>
+                            <td colspan="6">Loading level changes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
