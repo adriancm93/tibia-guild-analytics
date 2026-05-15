@@ -34,6 +34,67 @@ def health_check() -> dict:
         "status": "ok",
     }
 
+@app.get("/api/summary")
+def get_summary() -> dict:
+    snapshot_pairs = fetch_all("""
+        SELECT
+            extracted_at_utc,
+            snapshot_rank
+        FROM analytics.snapshot_pairs
+        WHERE snapshot_rank IN (1, 2)
+        ORDER BY snapshot_rank;
+    """)
+
+    counts = fetch_all("""
+        SELECT
+            'level_changes' AS metric_name,
+            COUNT(*) AS metric_value
+        FROM analytics.character_level_changes
+
+        UNION ALL
+
+        SELECT
+            'guild_joins' AS metric_name,
+            COUNT(*) AS metric_value
+        FROM analytics.guild_joins
+
+        UNION ALL
+
+        SELECT
+            'guild_leaves' AS metric_name,
+            COUNT(*) AS metric_value
+        FROM analytics.guild_leaves
+
+        UNION ALL
+
+        SELECT
+            'rank_changes' AS metric_name,
+            COUNT(*) AS metric_value
+        FROM analytics.rank_changes;
+    """)
+
+    latest_snapshot_time = None
+    previous_snapshot_time = None
+
+    for snapshot in snapshot_pairs:
+        if snapshot["snapshot_rank"] == 1:
+            latest_snapshot_time = snapshot["extracted_at_utc"]
+        elif snapshot["snapshot_rank"] == 2:
+            previous_snapshot_time = snapshot["extracted_at_utc"]
+
+    count_lookup = {
+        row["metric_name"]: row["metric_value"]
+        for row in counts
+    }
+
+    return {
+        "latest_snapshot_time": latest_snapshot_time,
+        "previous_snapshot_time": previous_snapshot_time,
+        "level_changes": count_lookup.get("level_changes", 0),
+        "guild_joins": count_lookup.get("guild_joins", 0),
+        "guild_leaves": count_lookup.get("guild_leaves", 0),
+        "rank_changes": count_lookup.get("rank_changes", 0),
+    }
 
 @app.get("/api/snapshot-pairs")
 def get_snapshot_pairs() -> list[dict]:
