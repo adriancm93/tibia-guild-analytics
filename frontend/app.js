@@ -12,6 +12,95 @@ const rankChangesCountElement = document.getElementById("rank-changes-count");
 const levelChangesTableElement = document.getElementById("level-changes-table");
 const refreshButton = document.getElementById("refresh-button");
 
+const guildJoinsTableElement = document.getElementById("guild-joins-table");
+const guildLeavesTableElement = document.getElementById("guild-leaves-table");
+const rankChangesTableElement = document.getElementById("rank-changes-table");
+
+function formatNullableDate(value) {
+    if (!value) {
+        return "Not available";
+    }
+
+    return value;
+}
+
+function renderGuildJoinsTable(guildJoins) {
+    if (!guildJoins.length) {
+        guildJoinsTableElement.innerHTML = `
+            <tr>
+                <td colspan="6">No guild joins found between the latest two snapshots.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    guildJoinsTableElement.innerHTML = guildJoins
+        .map((row) => {
+            return `
+                <tr>
+                    <td>${row.character_name}</td>
+                    <td>${row.vocation}</td>
+                    <td>${row.level}</td>
+                    <td>${row.guild_rank}</td>
+                    <td>${row.status}</td>
+                    <td>${formatNullableDate(row.joined_date)}</td>
+                </tr>
+            `;
+        })
+        .join("");
+}
+
+function renderGuildLeavesTable(guildLeaves) {
+    if (!guildLeaves.length) {
+        guildLeavesTableElement.innerHTML = `
+            <tr>
+                <td colspan="6">No guild leaves found between the latest two snapshots.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    guildLeavesTableElement.innerHTML = guildLeaves
+        .map((row) => {
+            return `
+                <tr>
+                    <td>${row.character_name}</td>
+                    <td>${row.vocation}</td>
+                    <td>${row.level}</td>
+                    <td>${row.guild_rank}</td>
+                    <td>${row.status}</td>
+                    <td>${formatNullableDate(row.joined_date)}</td>
+                </tr>
+            `;
+        })
+        .join("");
+}
+
+function renderRankChangesTable(rankChanges) {
+    if (!rankChanges.length) {
+        rankChangesTableElement.innerHTML = `
+            <tr>
+                <td colspan="5">No rank changes found between the latest two snapshots.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    rankChangesTableElement.innerHTML = rankChanges
+        .map((row) => {
+            return `
+                <tr>
+                    <td>${row.character_name}</td>
+                    <td>${row.previous_guild_rank}</td>
+                    <td>${row.current_guild_rank}</td>
+                    <td>${formatTimestamp(row.previous_snapshot_time)}</td>
+                    <td>${formatTimestamp(row.latest_snapshot_time)}</td>
+                </tr>
+            `;
+        })
+        .join("");
+}
+
 function formatTimestamp(timestamp) {
     if (!timestamp) {
         return "Not available";
@@ -81,6 +170,16 @@ async function loadLevelChanges() {
     renderLevelChangesTable(levelChanges);
 }
 
+async function loadGuildMovementTables() {
+    const guildJoins = await fetchJson("/api/guild-joins");
+    const guildLeaves = await fetchJson("/api/guild-leaves");
+    const rankChanges = await fetchJson("/api/rank-changes");
+
+    renderGuildJoinsTable(guildJoins);
+    renderGuildLeavesTable(guildLeaves);
+    renderRankChangesTable(rankChanges);
+}
+
 async function checkApiHealth() {
     const health = await fetchJson("/api/health");
 
@@ -101,6 +200,8 @@ async function loadDashboard() {
         await checkApiHealth();
         await loadSummary();
         await loadLevelChanges();
+        await loadGuildMovementTables();
+
     } catch (error) {
         apiStatusElement.textContent = `Unable to load dashboard data: ${error.message}`;
         apiStatusElement.className = "error";
@@ -108,6 +209,24 @@ async function loadDashboard() {
         levelChangesTableElement.innerHTML = `
             <tr>
                 <td colspan="6">Unable to load level changes.</td>
+            </tr>
+        `;
+
+        guildJoinsTableElement.innerHTML = `
+            <tr>
+                <td colspan="6">Unable to load guild joins.</td>
+            </tr>
+        `;
+
+        guildLeavesTableElement.innerHTML = `
+            <tr>
+                <td colspan="6">Unable to load guild leaves.</td>
+            </tr>
+        `;
+
+        rankChangesTableElement.innerHTML = `
+            <tr>
+                <td colspan="5">Unable to load rank changes.</td>
             </tr>
         `;
     } finally {

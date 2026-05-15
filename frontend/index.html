@@ -90,6 +90,93 @@
                 </table>
             </div>
         </section>
+
+        <section class="table-section">
+            <div class="section-header">
+                <div>
+                    <h2>Guild Joins</h2>
+                    <p>Characters who are present in the latest snapshot but were not present in the previous snapshot.</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Character</th>
+                            <th>Vocation</th>
+                            <th>Level</th>
+                            <th>Guild Rank</th>
+                            <th>Status</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guild-joins-table">
+                        <tr>
+                            <td colspan="6">Loading guild joins...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <div class="section-header">
+                <div>
+                    <h2>Guild Leaves</h2>
+                    <p>Characters who were present in the previous snapshot but are missing from the latest snapshot.</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Character</th>
+                            <th>Vocation</th>
+                            <th>Level</th>
+                            <th>Guild Rank</th>
+                            <th>Status</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guild-leaves-table">
+                        <tr>
+                            <td colspan="6">Loading guild leaves...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <div class="section-header">
+                <div>
+                    <h2>Rank Changes</h2>
+                    <p>Characters whose guild rank changed between the latest two snapshots.</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Character</th>
+                            <th>Previous Rank</th>
+                            <th>Current Rank</th>
+                            <th>Previous Snapshot</th>
+                            <th>Latest Snapshot</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rank-changes-table">
+                        <tr>
+                            <td colspan="5">Loading rank changes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
     </main>
 
     <script src="app.js"></script>
