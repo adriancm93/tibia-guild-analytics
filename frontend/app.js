@@ -21,7 +21,17 @@ function formatNullableDate(value) {
         return "Not available";
     }
 
-    return value;
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+    });
 }
 
 function renderGuildJoinsTable(guildJoins) {
@@ -139,6 +149,14 @@ async function loadSummary() {
     rankChangesCountElement.textContent = summary.rank_changes;
 }
 
+function formatLevelGain(value) {
+    if (value > 0) {
+        return `+${value}`;
+    }
+
+    return value;
+}
+
 function renderLevelChangesTable(levelChanges) {
     if (!levelChanges.length) {
         levelChangesTableElement.innerHTML = `
@@ -158,7 +176,7 @@ function renderLevelChangesTable(levelChanges) {
                     <td>${row.guild_rank}</td>
                     <td>${row.previous_level}</td>
                     <td>${row.current_level}</td>
-                    <td class="level-gain">+${row.level_gain}</td>
+                    <td class="level-gain">${formatLevelGain(row.level_gain)}</td>
                 </tr>
             `;
         })

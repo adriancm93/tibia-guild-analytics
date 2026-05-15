@@ -207,3 +207,17 @@ td {
         flex-direction: column;
     }
 }
+
+.site-footer {
+    width: min(1200px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 0 0 40px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.site-footer p {
+    margin: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+}
