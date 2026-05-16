@@ -127,18 +127,95 @@ function formatTimestamp(timestamp) {
     });
 }
 
-async function fetchJson(endpoint) {
+const DATA_SOURCE = window.APP_CONFIG?.DATA_SOURCE || "fastapi";
+const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = window.APP_CONFIG?.SUPABASE_ANON_KEY || "";
+
+async function fetchFastApi(endpoint) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`);
 
     if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
+        throw new Error(`FastAPI request failed: ${response.status}`);
     }
 
     return response.json();
 }
 
+async function fetchSupabase(viewName, queryString = "select=*") {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        throw new Error("Supabase URL or anon key is missing from config.js");
+    }
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${viewName}?${queryString}`, {
+        headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Supabase request failed: ${response.status} ${errorText}`);
+    }
+
+    return response.json();
+}
+
+async function fetchSummary() {
+    if (DATA_SOURCE === "supabase") {
+        const rows = await fetchSupabase("api_summary", "select=*");
+        return rows[0] || {};
+    }
+
+    return fetchFastApi("/api/summary");
+}
+
+async function fetchLevelChanges() {
+    if (DATA_SOURCE === "supabase") {
+        return fetchSupabase(
+            "api_character_level_changes",
+            "select=*&order=level_gain.desc,current_level.desc"
+        );
+    }
+
+    return fetchFastApi("/api/level-changes");
+}
+
+async function fetchGuildJoins() {
+    if (DATA_SOURCE === "supabase") {
+        return fetchSupabase(
+            "api_guild_joins",
+            "select=*&order=level.desc,character_name.asc"
+        );
+    }
+
+    return fetchFastApi("/api/guild-joins");
+}
+
+async function fetchGuildLeaves() {
+    if (DATA_SOURCE === "supabase") {
+        return fetchSupabase(
+            "api_guild_leaves",
+            "select=*&order=level.desc,character_name.asc"
+        );
+    }
+
+    return fetchFastApi("/api/guild-leaves");
+}
+
+async function fetchRankChanges() {
+    if (DATA_SOURCE === "supabase") {
+        return fetchSupabase(
+            "api_rank_changes",
+            "select=*&order=character_name.asc"
+        );
+    }
+
+    return fetchFastApi("/api/rank-changes");
+}
+
 async function loadSummary() {
-    const summary = await fetchJson("/api/summary");
+    const summary = await fetchSummary();
 
     latestSnapshotElement.textContent = formatTimestamp(summary.latest_snapshot_time);
     previousSnapshotElement.textContent = formatTimestamp(summary.previous_snapshot_time);
@@ -184,14 +261,14 @@ function renderLevelChangesTable(levelChanges) {
 }
 
 async function loadLevelChanges() {
-    const levelChanges = await fetchJson("/api/level-changes");
+    const levelChanges = await fetchLevelChanges();
     renderLevelChangesTable(levelChanges);
 }
 
 async function loadGuildMovementTables() {
-    const guildJoins = await fetchJson("/api/guild-joins");
-    const guildLeaves = await fetchJson("/api/guild-leaves");
-    const rankChanges = await fetchJson("/api/rank-changes");
+    const guildJoins = await fetchGuildJoins();
+    const guildLeaves = await fetchGuildLeaves();
+    const rankChanges = await fetchRankChanges();
 
     renderGuildJoinsTable(guildJoins);
     renderGuildLeavesTable(guildLeaves);
@@ -199,7 +276,21 @@ async function loadGuildMovementTables() {
 }
 
 async function checkApiHealth() {
-    const health = await fetchJson("/api/health");
+    if (DATA_SOURCE === "supabase") {
+        const summary = await fetchSummary();
+
+        if (summary.latest_snapshot_time) {
+            apiStatusElement.textContent = "Connected to Supabase.";
+            apiStatusElement.className = "success";
+            return;
+        }
+
+        apiStatusElement.textContent = "Connected to Supabase, but no snapshot data was found.";
+        apiStatusElement.className = "error";
+        return;
+    }
+
+    const health = await fetchFastApi("/api/health");
 
     if (health.status === "ok") {
         apiStatusElement.textContent = "Connected to FastAPI backend.";
