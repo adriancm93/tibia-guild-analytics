@@ -1,0 +1,74 @@
+name: Scheduled Supabase Ingestion
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs every 15 minutes, offset from common round times.
+    # GitHub Actions scheduled workflows use UTC.
+    - cron: "7,22,37,52 * * * *"
+
+jobs:
+  run-ingestion:
+    name: Run Tibia guild ingestion
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      TIBIA_GUILD_NAME: ${{ secrets.TIBIA_GUILD_NAME }}
+      TIBIA_WORLD: ${{ secrets.TIBIA_WORLD }}
+      RAW_DATA_DIR: data/raw
+
+      POSTGRES_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+      POSTGRES_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+      POSTGRES_DB: ${{ secrets.SUPABASE_DB_NAME }}
+      POSTGRES_USER: ${{ secrets.SUPABASE_DB_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ingestion dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r ingestion/requirements-ci.txt
+
+      - name: Confirm environment configuration
+        run: |
+          python - <<'PY'
+          import os
+
+          required_vars = [
+              "TIBIA_GUILD_NAME",
+              "TIBIA_WORLD",
+              "RAW_DATA_DIR",
+              "POSTGRES_HOST",
+              "POSTGRES_PORT",
+              "POSTGRES_DB",
+              "POSTGRES_USER",
+              "POSTGRES_PASSWORD",
+          ]
+
+          missing = [var for var in required_vars if not os.getenv(var)]
+
+          if missing:
+              raise SystemExit(f"Missing required environment variables: {missing}")
+
+          print("Environment configuration found.")
+          print(f"Guild: {os.getenv('TIBIA_GUILD_NAME')}")
+          print(f"World: {os.getenv('TIBIA_WORLD')}")
+          print(f"Raw data directory: {os.getenv('RAW_DATA_DIR')}")
+          print(f"Database host configured: {bool(os.getenv('POSTGRES_HOST'))}")
+          print(f"Database name: {os.getenv('POSTGRES_DB')}")
+          PY
+
+      - name: Extract latest guild data
+        run: python ingestion/src/main.py
+
+      - name: Load latest snapshot to Supabase Postgres
+        run: python ingestion/src/load_postgres.py
