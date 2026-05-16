@@ -163,3 +163,11 @@ View database logs:
 ```bash
 docker logs tibia_guild_postgres
 ```
+
+## Live Website
+
+The deployed frontend is available at:
+
+```text
+https://YOUR-CLOUDFLARE-PAGES-URL.pages.dev
+```
