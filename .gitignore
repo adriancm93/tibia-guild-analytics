@@ -5,9 +5,12 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+*/.venv/
 venv/
 env/
 *.egg-info/
+*.pyc
+
 
 # Environment variables
 .env
@@ -18,6 +21,8 @@ env/
 data/
 *.sqlite
 *.db
+exports/
+data/raw/
 
 # Logs
 *.log
