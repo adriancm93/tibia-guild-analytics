@@ -219,6 +219,18 @@ td {
     }
 }
 
+.level-changes-scroll {
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.level-changes-scroll thead th {
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+    z-index: 1;
+}
+
 .sortable {
     cursor: pointer;
     user-select: none;
