@@ -487,6 +487,53 @@ function handleTableSort(event) {
     renderSortedTable(tableName);
 }
 
+function aggregateLevelChangesByCharacter(levelChanges) {
+    const characterMap = new Map();
+
+    levelChanges.forEach((row) => {
+        const characterName = row.character_name;
+
+        if (!characterMap.has(characterName)) {
+            characterMap.set(characterName, {
+                character_name: row.character_name,
+                vocation: row.vocation,
+                guild_rank: row.guild_rank,
+                previous_level: row.previous_level,
+                current_level: row.current_level,
+                level_gain: Number(row.level_gain) || 0,
+                first_snapshot_time: row.previous_snapshot_time,
+                latest_snapshot_time: row.latest_snapshot_time
+            });
+
+            return;
+        }
+
+        const existing = characterMap.get(characterName);
+
+        existing.level_gain += Number(row.level_gain) || 0;
+
+        const rowPreviousTime = new Date(row.previous_snapshot_time).getTime();
+        const existingFirstTime = new Date(existing.first_snapshot_time).getTime();
+
+        if (rowPreviousTime < existingFirstTime) {
+            existing.previous_level = row.previous_level;
+            existing.first_snapshot_time = row.previous_snapshot_time;
+        }
+
+        const rowLatestTime = new Date(row.latest_snapshot_time).getTime();
+        const existingLatestTime = new Date(existing.latest_snapshot_time).getTime();
+
+        if (rowLatestTime > existingLatestTime) {
+            existing.current_level = row.current_level;
+            existing.guild_rank = row.guild_rank;
+            existing.vocation = row.vocation;
+            existing.latest_snapshot_time = row.latest_snapshot_time;
+        }
+    });
+
+    return Array.from(characterMap.values());
+}
+
 function renderLevelChangesTable(levelChanges) {
     if (!levelChanges.length) {
         levelChangesTableElement.innerHTML = `
@@ -515,7 +562,10 @@ function renderLevelChangesTable(levelChanges) {
 
 async function loadLevelChanges() {
     const dateRange = getDateRange(levelStartDateElement, levelEndDateElement);
-    tableData.level = await fetchLevelChanges(dateRange);
+    const rawLevelChanges = await fetchLevelChanges(dateRange);
+
+    tableData.level = aggregateLevelChangesByCharacter(rawLevelChanges);
+
     renderSortedTable("level");
 }
 
