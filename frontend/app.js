@@ -1,13 +1,16 @@
 const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || "http://127.0.0.1:8000";
 
-const apiStatusElement = document.getElementById("api-status");
-const latestSnapshotElement = document.getElementById("latest-snapshot");
-const previousSnapshotElement = document.getElementById("previous-snapshot");
+const overviewGuildNameElement = document.getElementById("overview-guild-name");
+const overviewWorldNameElement = document.getElementById("overview-world-name");
+const overviewLatestRefreshElement = document.getElementById("overview-latest-refresh");
+const overviewMemberCountElement = document.getElementById("overview-member-count");
+const overviewMaxLevelElement = document.getElementById("overview-max-level");
+const overviewMinLevelElement = document.getElementById("overview-min-level");
+const overviewAverageLevelElement = document.getElementById("overview-average-level");
 
-const levelChangesCountElement = document.getElementById("level-changes-count");
-const guildJoinsCountElement = document.getElementById("guild-joins-count");
-const guildLeavesCountElement = document.getElementById("guild-leaves-count");
-const rankChangesCountElement = document.getElementById("rank-changes-count");
+const overviewStartDateElement = document.getElementById("overview-start-date");
+const overviewEndDateElement = document.getElementById("overview-end-date");
+const applyOverviewFilterButton = document.getElementById("apply-overview-filter");
 
 const levelChangesTableElement = document.getElementById("level-changes-table");
 
@@ -204,6 +207,8 @@ function timestampToDateInputValue(timestamp) {
 
 function applyDateInputBounds(minDate, maxDate) {
     const dateInputs = [
+        overviewStartDateElement,
+        overviewEndDateElement,
         levelStartDateElement,
         levelEndDateElement,
         joinsStartDateElement,
@@ -231,24 +236,27 @@ async function initializeDateBounds() {
     }
 }
 
-function buildSupabaseDateRangeQuery(baseQuery, dateRange) {
+function buildSupabaseDateRangeQuery(baseQuery, dateRange, dateColumn = "latest_snapshot_time") {
     if (!dateRange) {
         return baseQuery;
     }
 
-    return `${baseQuery}&latest_snapshot_time=gte.${dateRange.startTimestamp}&latest_snapshot_time=lte.${dateRange.endTimestamp}`;
+    return `${baseQuery}&${dateColumn}=gte.${dateRange.startTimestamp}&${dateColumn}=lte.${dateRange.endTimestamp}`;
 }
 
 function setDefaultDateRanges() {
     const defaultStartDate = formatDateInputValue(getDateDaysAgo(7));
     const defaultEndDate = formatDateInputValue(new Date());
 
-    const minAllowedDate = levelStartDateElement.min;
+    const minAllowedDate = overviewStartDateElement.min || levelStartDateElement.min;
 
     const safeStartDate =
         minAllowedDate && defaultStartDate < minAllowedDate
             ? minAllowedDate
             : defaultStartDate;
+
+    overviewStartDateElement.value = safeStartDate;
+    overviewEndDateElement.value = defaultEndDate;
 
     levelStartDateElement.value = safeStartDate;
     levelEndDateElement.value = defaultEndDate;
@@ -369,16 +377,47 @@ async function fetchRankChanges(dateRange = null) {
     return fetchFastApi("/api/rank-changes");
 }
 
-async function loadSummary() {
-    const summary = await fetchSummary();
+async function fetchGuildOverview(dateRange = null) {
+    if (DATA_SOURCE === "supabase") {
+        const query = buildSupabaseDateRangeQuery(
+            "select=*&order=snapshot_time.desc&limit=1",
+            dateRange,
+            "snapshot_time"
+        );
 
-    latestSnapshotElement.textContent = formatTimestamp(summary.latest_snapshot_time);
-    previousSnapshotElement.textContent = formatTimestamp(summary.previous_snapshot_time);
+        return fetchSupabase("api_guild_overview_by_snapshot", query);
+    }
 
-    levelChangesCountElement.textContent = summary.level_changes;
-    guildJoinsCountElement.textContent = summary.guild_joins;
-    guildLeavesCountElement.textContent = summary.guild_leaves;
-    rankChangesCountElement.textContent = summary.rank_changes;
+    return [];
+}
+
+function renderGuildOverview(rows) {
+    const overview = rows[0];
+
+    if (!overview) {
+        overviewGuildNameElement.textContent = "No guild data found";
+        overviewWorldNameElement.textContent = "";
+        overviewLatestRefreshElement.textContent = "Not available";
+        overviewMemberCountElement.textContent = "0";
+        overviewMaxLevelElement.textContent = "0";
+        overviewMinLevelElement.textContent = "0";
+        overviewAverageLevelElement.textContent = "0";
+        return;
+    }
+
+    overviewGuildNameElement.textContent = overview.guild_name;
+    overviewWorldNameElement.textContent = overview.world;
+    overviewLatestRefreshElement.textContent = formatTimestamp(overview.snapshot_time);
+    overviewMemberCountElement.textContent = overview.number_of_members;
+    overviewMaxLevelElement.textContent = overview.max_level;
+    overviewMinLevelElement.textContent = overview.min_level;
+    overviewAverageLevelElement.textContent = overview.average_level;
+}
+
+async function loadGuildOverview() {
+    const dateRange = getDateRange(overviewStartDateElement, overviewEndDateElement);
+    const overviewRows = await fetchGuildOverview(dateRange);
+    renderGuildOverview(overviewRows);
 }
 
 function formatLevelGain(value) {
@@ -593,41 +632,17 @@ async function loadGuildMovementTables() {
     await loadRankChanges();
 }
 
-async function checkApiHealth() {
-    if (DATA_SOURCE === "supabase") {
-        const summary = await fetchSummary();
-
-        if (summary.latest_snapshot_time) {
-            apiStatusElement.textContent = "Connected to Supabase.";
-            apiStatusElement.className = "success";
-            return;
-        }
-
-        apiStatusElement.textContent = "Connected to Supabase, but no snapshot data was found.";
-        apiStatusElement.className = "error";
-        return;
-    }
-
-    const health = await fetchFastApi("/api/health");
-
-    if (health.status === "ok") {
-        apiStatusElement.textContent = "Connected to FastAPI backend.";
-        apiStatusElement.className = "success";
-    } else {
-        apiStatusElement.textContent = "Backend responded, but status was unexpected.";
-        apiStatusElement.className = "error";
-    }
-}
-
 async function loadDashboard() {
     try {
-        await checkApiHealth();
-        await loadSummary();
+        await loadGuildOverview();
         await loadLevelChanges();
         await loadGuildMovementTables();
     } catch (error) {
-        apiStatusElement.textContent = `Unable to load dashboard data: ${error.message}`;
-        apiStatusElement.className = "error";
+        console.error(error);
+
+        overviewGuildNameElement.textContent = "Unable to load guild overview";
+        overviewWorldNameElement.textContent = "";
+        overviewLatestRefreshElement.textContent = "Not available";
 
         levelChangesTableElement.innerHTML = `
             <tr>
@@ -659,6 +674,7 @@ document.querySelectorAll(".sortable").forEach((header) => {
     header.addEventListener("click", handleTableSort);
 });
 
+applyOverviewFilterButton.addEventListener("click", loadGuildOverview);
 applyLevelFilterButton.addEventListener("click", loadLevelChanges);
 applyJoinsFilterButton.addEventListener("click", loadGuildJoins);
 applyLeavesFilterButton.addEventListener("click", loadGuildLeaves);

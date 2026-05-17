@@ -18,45 +18,47 @@
     </header>
 
     <main class="page-container">
-        <section class="status-card">
-            <div>
-                <h2>API Status</h2>
-                <p id="api-status">Checking backend connection...</p>
-            </div>
-        </section>
-
-        <section class="snapshot-section">
-            <h2>Snapshot Window</h2>
-            <div class="snapshot-grid">
-                <div class="card">
-                    <p class="card-label">Latest Snapshot</p>
-                    <p id="latest-snapshot" class="card-value">Loading...</p>
+        <section class="guild-overview-section table-section">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Guild Overview</p>
+                    <h2 id="overview-guild-name">Loading guild...</h2>
+                    <p id="overview-world-name" class="overview-world">Loading world...</p>
+                    <p class="overview-refresh">
+                        Latest Refresh:
+                        <span id="overview-latest-refresh">Loading...</span>
+                    </p>
                 </div>
-                <div class="card">
-                    <p class="card-label">Previous Snapshot</p>
-                    <p id="previous-snapshot" class="card-value">Loading...</p>
+
+                <div class="date-filter">
+                    <label>
+                        From
+                        <input type="date" id="overview-start-date" />
+                    </label>
+                    <label>
+                        To
+                        <input type="date" id="overview-end-date" />
+                    </label>
+                    <button id="apply-overview-filter">Apply</button>
                 </div>
             </div>
-        </section>
 
-        <section class="summary-section">
-            <h2>Change Summary</h2>
             <div class="summary-grid">
                 <div class="card metric-card">
-                    <p class="card-label">Level Changes</p>
-                    <p id="level-changes-count" class="metric-value">0</p>
+                    <p class="card-label">Number of Members</p>
+                    <p id="overview-member-count" class="metric-value">0</p>
                 </div>
                 <div class="card metric-card">
-                    <p class="card-label">Guild Joins</p>
-                    <p id="guild-joins-count" class="metric-value">0</p>
+                    <p class="card-label">Max Level</p>
+                    <p id="overview-max-level" class="metric-value">0</p>
                 </div>
                 <div class="card metric-card">
-                    <p class="card-label">Guild Leaves</p>
-                    <p id="guild-leaves-count" class="metric-value">0</p>
+                    <p class="card-label">Min Level</p>
+                    <p id="overview-min-level" class="metric-value">0</p>
                 </div>
                 <div class="card metric-card">
-                    <p class="card-label">Rank Changes</p>
-                    <p id="rank-changes-count" class="metric-value">0</p>
+                    <p class="card-label">Average Level</p>
+                    <p id="overview-average-level" class="metric-value">0</p>
                 </div>
             </div>
         </section>

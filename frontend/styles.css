@@ -121,6 +121,28 @@ h2 {
     font-weight: 800;
 }
 
+.guild-overview-section {
+    padding: 24px;
+}
+
+.overview-world {
+    margin: 4px 0 10px;
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.overview-refresh {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.overview-refresh span {
+    color: var(--text);
+    font-weight: 700;
+}
+
 .table-section {
     padding: 24px;
 }
