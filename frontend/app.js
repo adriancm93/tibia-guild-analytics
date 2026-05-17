@@ -10,11 +10,26 @@ const guildLeavesCountElement = document.getElementById("guild-leaves-count");
 const rankChangesCountElement = document.getElementById("rank-changes-count");
 
 const levelChangesTableElement = document.getElementById("level-changes-table");
-const refreshButton = document.getElementById("refresh-button");
 
 const guildJoinsTableElement = document.getElementById("guild-joins-table");
 const guildLeavesTableElement = document.getElementById("guild-leaves-table");
 const rankChangesTableElement = document.getElementById("rank-changes-table");
+
+const levelStartDateElement = document.getElementById("level-start-date");
+const levelEndDateElement = document.getElementById("level-end-date");
+const applyLevelFilterButton = document.getElementById("apply-level-filter");
+
+const joinsStartDateElement = document.getElementById("joins-start-date");
+const joinsEndDateElement = document.getElementById("joins-end-date");
+const applyJoinsFilterButton = document.getElementById("apply-joins-filter");
+
+const leavesStartDateElement = document.getElementById("leaves-start-date");
+const leavesEndDateElement = document.getElementById("leaves-end-date");
+const applyLeavesFilterButton = document.getElementById("apply-leaves-filter");
+
+const rankStartDateElement = document.getElementById("rank-start-date");
+const rankEndDateElement = document.getElementById("rank-end-date");
+const applyRankFilterButton = document.getElementById("apply-rank-filter");
 
 function formatNullableDate(value) {
     if (!value) {
@@ -127,6 +142,55 @@ function formatTimestamp(timestamp) {
     });
 }
 
+function formatDateInputValue(date) {
+    return date.toISOString().slice(0, 10);
+}
+
+function getDateDaysAgo(daysAgo) {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    return date;
+}
+
+function getDateRange(startElement, endElement) {
+    const startDate = startElement.value;
+    const endDate = endElement.value;
+
+    if (!startDate || !endDate) {
+        return null;
+    }
+
+    return {
+        startTimestamp: `${startDate}T00:00:00.000Z`,
+        endTimestamp: `${endDate}T23:59:59.999Z`
+    };
+}
+
+function buildSupabaseDateRangeQuery(baseQuery, dateRange) {
+    if (!dateRange) {
+        return baseQuery;
+    }
+
+    return `${baseQuery}&latest_snapshot_time=gte.${dateRange.startTimestamp}&latest_snapshot_time=lte.${dateRange.endTimestamp}`;
+}
+
+function setDefaultDateRanges() {
+    const defaultStartDate = formatDateInputValue(getDateDaysAgo(7));
+    const defaultEndDate = formatDateInputValue(new Date());
+
+    levelStartDateElement.value = defaultStartDate;
+    levelEndDateElement.value = defaultEndDate;
+
+    joinsStartDateElement.value = defaultStartDate;
+    joinsEndDateElement.value = defaultEndDate;
+
+    leavesStartDateElement.value = defaultStartDate;
+    leavesEndDateElement.value = defaultEndDate;
+
+    rankStartDateElement.value = defaultStartDate;
+    rankEndDateElement.value = defaultEndDate;
+}
+
 const DATA_SOURCE = window.APP_CONFIG?.DATA_SOURCE || "fastapi";
 const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || "";
 const SUPABASE_ANON_KEY = window.APP_CONFIG?.SUPABASE_ANON_KEY || "";
@@ -170,45 +234,53 @@ async function fetchSummary() {
     return fetchFastApi("/api/summary");
 }
 
-async function fetchLevelChanges() {
+async function fetchLevelChanges(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        return fetchSupabase(
-            "api_character_level_changes",
-            "select=*&order=level_gain.desc,current_level.desc"
+        const query = buildSupabaseDateRangeQuery(
+            "select=*&order=latest_snapshot_time.desc,level_gain.desc,current_level.desc",
+            dateRange
         );
+
+        return fetchSupabase("api_historical_character_level_changes", query);
     }
 
     return fetchFastApi("/api/level-changes");
 }
 
-async function fetchGuildJoins() {
+async function fetchGuildJoins(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        return fetchSupabase(
-            "api_guild_joins",
-            "select=*&order=level.desc,character_name.asc"
+        const query = buildSupabaseDateRangeQuery(
+            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc",
+            dateRange
         );
+
+        return fetchSupabase("api_historical_guild_joins", query);
     }
 
     return fetchFastApi("/api/guild-joins");
 }
 
-async function fetchGuildLeaves() {
+async function fetchGuildLeaves(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        return fetchSupabase(
-            "api_guild_leaves",
-            "select=*&order=level.desc,character_name.asc"
+        const query = buildSupabaseDateRangeQuery(
+            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc",
+            dateRange
         );
+
+        return fetchSupabase("api_historical_guild_leaves", query);
     }
 
     return fetchFastApi("/api/guild-leaves");
 }
 
-async function fetchRankChanges() {
+async function fetchRankChanges(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        return fetchSupabase(
-            "api_rank_changes",
-            "select=*&order=character_name.asc"
+        const query = buildSupabaseDateRangeQuery(
+            "select=*&order=latest_snapshot_time.desc,character_name.asc",
+            dateRange
         );
+
+        return fetchSupabase("api_historical_rank_changes", query);
     }
 
     return fetchFastApi("/api/rank-changes");
@@ -261,18 +333,33 @@ function renderLevelChangesTable(levelChanges) {
 }
 
 async function loadLevelChanges() {
-    const levelChanges = await fetchLevelChanges();
+    const dateRange = getDateRange(levelStartDateElement, levelEndDateElement);
+    const levelChanges = await fetchLevelChanges(dateRange);
     renderLevelChangesTable(levelChanges);
 }
 
-async function loadGuildMovementTables() {
-    const guildJoins = await fetchGuildJoins();
-    const guildLeaves = await fetchGuildLeaves();
-    const rankChanges = await fetchRankChanges();
-
+async function loadGuildJoins() {
+    const dateRange = getDateRange(joinsStartDateElement, joinsEndDateElement);
+    const guildJoins = await fetchGuildJoins(dateRange);
     renderGuildJoinsTable(guildJoins);
+}
+
+async function loadGuildLeaves() {
+    const dateRange = getDateRange(leavesStartDateElement, leavesEndDateElement);
+    const guildLeaves = await fetchGuildLeaves(dateRange);
     renderGuildLeavesTable(guildLeaves);
+}
+
+async function loadRankChanges() {
+    const dateRange = getDateRange(rankStartDateElement, rankEndDateElement);
+    const rankChanges = await fetchRankChanges(dateRange);
     renderRankChangesTable(rankChanges);
+}
+
+async function loadGuildMovementTables() {
+    await loadGuildJoins();
+    await loadGuildLeaves();
+    await loadRankChanges();
 }
 
 async function checkApiHealth() {
@@ -303,14 +390,10 @@ async function checkApiHealth() {
 
 async function loadDashboard() {
     try {
-        refreshButton.disabled = true;
-        refreshButton.textContent = "Refreshing...";
-
         await checkApiHealth();
         await loadSummary();
         await loadLevelChanges();
         await loadGuildMovementTables();
-
     } catch (error) {
         apiStatusElement.textContent = `Unable to load dashboard data: ${error.message}`;
         apiStatusElement.className = "error";
@@ -338,12 +421,13 @@ async function loadDashboard() {
                 <td colspan="5">Unable to load rank changes.</td>
             </tr>
         `;
-    } finally {
-        refreshButton.disabled = false;
-        refreshButton.textContent = "Refresh Data";
     }
 }
 
-refreshButton.addEventListener("click", loadDashboard);
+applyLevelFilterButton.addEventListener("click", loadLevelChanges);
+applyJoinsFilterButton.addEventListener("click", loadGuildJoins);
+applyLeavesFilterButton.addEventListener("click", loadGuildLeaves);
+applyRankFilterButton.addEventListener("click", loadRankChanges);
 
+setDefaultDateRanges();
 loadDashboard();

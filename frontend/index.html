@@ -65,9 +65,20 @@
             <div class="section-header">
                 <div>
                     <h2>Character Level Changes</h2>
-                    <p>Characters whose level changed between the latest two snapshots.</p>
+                    <p>Characters whose level changed within the selected snapshot date range.</p>
                 </div>
-                <button id="refresh-button">Refresh Data</button>
+
+                <div class="date-filter">
+                    <label>
+                        From
+                        <input type="date" id="level-start-date" />
+                    </label>
+                    <label>
+                        To
+                        <input type="date" id="level-end-date" />
+                    </label>
+                    <button id="apply-level-filter">Apply</button>
+                </div>
             </div>
 
             <div class="table-wrapper">
@@ -95,7 +106,19 @@
             <div class="section-header">
                 <div>
                     <h2>Guild Joins</h2>
-                    <p>Characters who are present in the latest snapshot but were not present in the previous snapshot.</p>
+                    <p>Characters who joined within the selected snapshot date range.</p>
+                </div>
+
+                <div class="date-filter">
+                    <label>
+                        From
+                        <input type="date" id="joins-start-date" />
+                    </label>
+                    <label>
+                        To
+                        <input type="date" id="joins-end-date" />
+                    </label>
+                    <button id="apply-joins-filter">Apply</button>
                 </div>
             </div>
 
@@ -124,7 +147,19 @@
             <div class="section-header">
                 <div>
                     <h2>Guild Leaves</h2>
-                    <p>Characters who were present in the previous snapshot but are missing from the latest snapshot.</p>
+                    <p>Characters who left within the selected snapshot date range.</p>
+                </div>
+
+                <div class="date-filter">
+                    <label>
+                        From
+                        <input type="date" id="leaves-start-date" />
+                    </label>
+                    <label>
+                        To
+                        <input type="date" id="leaves-end-date" />
+                    </label>
+                    <button id="apply-leaves-filter">Apply</button>
                 </div>
             </div>
 
@@ -153,7 +188,19 @@
             <div class="section-header">
                 <div>
                     <h2>Rank Changes</h2>
-                    <p>Characters whose guild rank changed between the latest two snapshots.</p>
+                    <p>Characters whose guild rank changed within the selected snapshot date range.</p>
+                </div>
+
+                <div class="date-filter">
+                    <label>
+                        From
+                        <input type="date" id="rank-start-date" />
+                    </label>
+                    <label>
+                        To
+                        <input type="date" id="rank-end-date" />
+                    </label>
+                    <button id="apply-rank-filter">Apply</button>
                 </div>
             </div>
 
