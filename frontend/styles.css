@@ -219,6 +219,31 @@ td {
     }
 }
 
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable:hover {
+    color: var(--accent);
+}
+
+.sortable::after {
+    content: " ↕";
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.sortable.sort-asc::after {
+    content: " ↑";
+    color: var(--accent);
+}
+
+.sortable.sort-desc::after {
+    content: " ↓";
+    color: var(--accent);
+}
+
 .date-filter {
     display: flex;
     align-items: end;

@@ -31,6 +31,34 @@ const rankStartDateElement = document.getElementById("rank-start-date");
 const rankEndDateElement = document.getElementById("rank-end-date");
 const applyRankFilterButton = document.getElementById("apply-rank-filter");
 
+let currentLevelChanges = [];
+
+const tableData = {
+    level: [],
+    joins: [],
+    leaves: [],
+    rank: []
+};
+
+const tableSortState = {
+    level: {
+        key: "level_gain",
+        direction: "desc"
+    },
+    joins: {
+        key: "latest_snapshot_time",
+        direction: "desc"
+    },
+    leaves: {
+        key: "latest_snapshot_time",
+        direction: "desc"
+    },
+    rank: {
+        key: "latest_snapshot_time",
+        direction: "desc"
+    }
+};
+
 function formatNullableDate(value) {
     if (!value) {
         return "Not available";
@@ -166,6 +194,43 @@ function getDateRange(startElement, endElement) {
     };
 }
 
+function timestampToDateInputValue(timestamp) {
+    if (!timestamp) {
+        return "";
+    }
+
+    return new Date(timestamp).toISOString().slice(0, 10);
+}
+
+function applyDateInputBounds(minDate, maxDate) {
+    const dateInputs = [
+        levelStartDateElement,
+        levelEndDateElement,
+        joinsStartDateElement,
+        joinsEndDateElement,
+        leavesStartDateElement,
+        leavesEndDateElement,
+        rankStartDateElement,
+        rankEndDateElement
+    ];
+
+    dateInputs.forEach((input) => {
+        input.min = minDate;
+        input.max = maxDate;
+    });
+}
+
+async function initializeDateBounds() {
+    const bounds = await fetchSnapshotDateBounds();
+
+    const minDate = timestampToDateInputValue(bounds.min_snapshot_time);
+    const maxDate = timestampToDateInputValue(bounds.max_snapshot_time) || formatDateInputValue(new Date());
+
+    if (minDate) {
+        applyDateInputBounds(minDate, maxDate);
+    }
+}
+
 function buildSupabaseDateRangeQuery(baseQuery, dateRange) {
     if (!dateRange) {
         return baseQuery;
@@ -178,16 +243,23 @@ function setDefaultDateRanges() {
     const defaultStartDate = formatDateInputValue(getDateDaysAgo(7));
     const defaultEndDate = formatDateInputValue(new Date());
 
-    levelStartDateElement.value = defaultStartDate;
+    const minAllowedDate = levelStartDateElement.min;
+
+    const safeStartDate =
+        minAllowedDate && defaultStartDate < minAllowedDate
+            ? minAllowedDate
+            : defaultStartDate;
+
+    levelStartDateElement.value = safeStartDate;
     levelEndDateElement.value = defaultEndDate;
 
-    joinsStartDateElement.value = defaultStartDate;
+    joinsStartDateElement.value = safeStartDate;
     joinsEndDateElement.value = defaultEndDate;
 
-    leavesStartDateElement.value = defaultStartDate;
+    leavesStartDateElement.value = safeStartDate;
     leavesEndDateElement.value = defaultEndDate;
 
-    rankStartDateElement.value = defaultStartDate;
+    rankStartDateElement.value = safeStartDate;
     rankEndDateElement.value = defaultEndDate;
 }
 
@@ -223,6 +295,17 @@ async function fetchSupabase(viewName, queryString = "select=*") {
     }
 
     return response.json();
+}
+async function fetchSnapshotDateBounds() {
+    if (DATA_SOURCE === "supabase") {
+        const rows = await fetchSupabase("api_snapshot_date_bounds", "select=*");
+        return rows[0] || {};
+    }
+
+    return {
+        min_snapshot_time: null,
+        max_snapshot_time: null
+    };
 }
 
 async function fetchSummary() {
@@ -306,6 +389,104 @@ function formatLevelGain(value) {
     return value;
 }
 
+function compareValues(a, b, direction) {
+    if (a === null || a === undefined) return 1;
+    if (b === null || b === undefined) return -1;
+
+    const aNumber = Number(a);
+    const bNumber = Number(b);
+
+    if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber)) {
+        return direction === "asc" ? aNumber - bNumber : bNumber - aNumber;
+    }
+
+    const aDate = Date.parse(a);
+    const bDate = Date.parse(b);
+
+    if (!Number.isNaN(aDate) && !Number.isNaN(bDate)) {
+        return direction === "asc" ? aDate - bDate : bDate - aDate;
+    }
+
+    const aValue = String(a).toLowerCase();
+    const bValue = String(b).toLowerCase();
+
+    if (aValue < bValue) {
+        return direction === "asc" ? -1 : 1;
+    }
+
+    if (aValue > bValue) {
+        return direction === "asc" ? 1 : -1;
+    }
+
+    return 0;
+}
+
+function getSortedTableData(tableName) {
+    const { key, direction } = tableSortState[tableName];
+
+    return [...tableData[tableName]].sort((a, b) => {
+        return compareValues(a[key], b[key], direction);
+    });
+}
+
+function updateSortHeaderStyles() {
+    const sortableHeaders = document.querySelectorAll(".sortable");
+
+    sortableHeaders.forEach((header) => {
+        const tableName = header.dataset.table;
+        const sortKey = header.dataset.sortKey;
+
+        header.classList.remove("sort-asc", "sort-desc");
+
+        if (
+            tableSortState[tableName] &&
+            tableSortState[tableName].key === sortKey
+        ) {
+            header.classList.add(
+                tableSortState[tableName].direction === "asc"
+                    ? "sort-asc"
+                    : "sort-desc"
+            );
+        }
+    });
+}
+
+function renderSortedTable(tableName) {
+    const sortedData = getSortedTableData(tableName);
+
+    if (tableName === "level") {
+        renderLevelChangesTable(sortedData);
+    } else if (tableName === "joins") {
+        renderGuildJoinsTable(sortedData);
+    } else if (tableName === "leaves") {
+        renderGuildLeavesTable(sortedData);
+    } else if (tableName === "rank") {
+        renderRankChangesTable(sortedData);
+    }
+
+    updateSortHeaderStyles();
+}
+
+function handleTableSort(event) {
+    const header = event.currentTarget;
+    const tableName = header.dataset.table;
+    const sortKey = header.dataset.sortKey;
+
+    if (!tableName || !sortKey || !tableSortState[tableName]) {
+        return;
+    }
+
+    if (tableSortState[tableName].key === sortKey) {
+        tableSortState[tableName].direction =
+            tableSortState[tableName].direction === "asc" ? "desc" : "asc";
+    } else {
+        tableSortState[tableName].key = sortKey;
+        tableSortState[tableName].direction = "asc";
+    }
+
+    renderSortedTable(tableName);
+}
+
 function renderLevelChangesTable(levelChanges) {
     if (!levelChanges.length) {
         levelChangesTableElement.innerHTML = `
@@ -334,26 +515,26 @@ function renderLevelChangesTable(levelChanges) {
 
 async function loadLevelChanges() {
     const dateRange = getDateRange(levelStartDateElement, levelEndDateElement);
-    const levelChanges = await fetchLevelChanges(dateRange);
-    renderLevelChangesTable(levelChanges);
+    tableData.level = await fetchLevelChanges(dateRange);
+    renderSortedTable("level");
 }
 
 async function loadGuildJoins() {
     const dateRange = getDateRange(joinsStartDateElement, joinsEndDateElement);
-    const guildJoins = await fetchGuildJoins(dateRange);
-    renderGuildJoinsTable(guildJoins);
+    tableData.joins = await fetchGuildJoins(dateRange);
+    renderSortedTable("joins");
 }
 
 async function loadGuildLeaves() {
     const dateRange = getDateRange(leavesStartDateElement, leavesEndDateElement);
-    const guildLeaves = await fetchGuildLeaves(dateRange);
-    renderGuildLeavesTable(guildLeaves);
+    tableData.leaves = await fetchGuildLeaves(dateRange);
+    renderSortedTable("leaves");
 }
 
 async function loadRankChanges() {
     const dateRange = getDateRange(rankStartDateElement, rankEndDateElement);
-    const rankChanges = await fetchRankChanges(dateRange);
-    renderRankChangesTable(rankChanges);
+    tableData.rank = await fetchRankChanges(dateRange);
+    renderSortedTable("rank");
 }
 
 async function loadGuildMovementTables() {
@@ -424,10 +605,21 @@ async function loadDashboard() {
     }
 }
 
+document.querySelectorAll(".sortable").forEach((header) => {
+    header.addEventListener("click", handleTableSort);
+});
+
 applyLevelFilterButton.addEventListener("click", loadLevelChanges);
 applyJoinsFilterButton.addEventListener("click", loadGuildJoins);
 applyLeavesFilterButton.addEventListener("click", loadGuildLeaves);
 applyRankFilterButton.addEventListener("click", loadRankChanges);
 
-setDefaultDateRanges();
-loadDashboard();
+initializeDateBounds()
+    .then(() => {
+        setDefaultDateRanges();
+        return loadDashboard();
+    })
+    .catch((error) => {
+        apiStatusElement.textContent = `Unable to initialize dashboard: ${error.message}`;
+        apiStatusElement.className = "error";
+    });
