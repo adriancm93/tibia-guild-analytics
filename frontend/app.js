@@ -9,10 +9,10 @@ const overviewMinLevelElement = document.getElementById("overview-min-level");
 const overviewAverageLevelElement = document.getElementById("overview-average-level");
 
 const levelChangesTableElement = document.getElementById("level-changes-table");
-
 const guildJoinsTableElement = document.getElementById("guild-joins-table");
 const guildLeavesTableElement = document.getElementById("guild-leaves-table");
 const rankChangesTableElement = document.getElementById("rank-changes-table");
+const guildMembersTableElement = document.getElementById("guild-members-table");
 
 const levelStartDateElement = document.getElementById("level-start-date");
 const levelEndDateElement = document.getElementById("level-end-date");
@@ -36,7 +36,8 @@ const tableData = {
     level: [],
     joins: [],
     leaves: [],
-    rank: []
+    rank: [],
+    members: []
 };
 
 const tableSortState = {
@@ -54,6 +55,10 @@ const tableSortState = {
     },
     rank: {
         key: "latest_snapshot_time",
+        direction: "desc"
+    },
+    members: {
+        key: "current_level",
         direction: "desc"
     }
 };
@@ -359,6 +364,17 @@ async function fetchRankChanges(dateRange = null) {
     return fetchFastApi("/api/rank-changes");
 }
 
+async function fetchGuildMembers() {
+    if (DATA_SOURCE === "supabase") {
+        return fetchSupabase(
+            "api_latest_guild_members",
+            "select=*&order=current_level.desc,character_name.asc"
+        );
+    }
+
+    return [];
+}
+
 async function fetchGuildOverview() {
     if (DATA_SOURCE === "supabase") {
         return fetchSupabase(
@@ -479,6 +495,8 @@ function renderSortedTable(tableName) {
         renderGuildLeavesTable(sortedData);
     } else if (tableName === "rank") {
         renderRankChangesTable(sortedData);
+    } else if (tableName === "members") {
+        renderGuildMembersTable(sortedData);
     }
 
     updateSortHeaderStyles();
@@ -577,6 +595,30 @@ function renderLevelChangesTable(levelChanges) {
         .join("");
 }
 
+function renderGuildMembersTable(members) {
+    if (!members.length) {
+        guildMembersTableElement.innerHTML = `
+            <tr>
+                <td colspan="4">No guild members found.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    guildMembersTableElement.innerHTML = members
+        .map((member) => {
+            return `
+                <tr>
+                    <td>${member.character_name}</td>
+                    <td>${member.vocation || ""}</td>
+                    <td>${member.guild_rank || ""}</td>
+                    <td>${member.current_level ?? ""}</td>
+                </tr>
+            `;
+        })
+        .join("");
+}
+
 async function loadLevelChanges() {
     const dateRange = getDateRange(levelStartDateElement, levelEndDateElement);
     const rawLevelChanges = await fetchLevelChanges(dateRange);
@@ -610,11 +652,17 @@ async function loadGuildMovementTables() {
     await loadRankChanges();
 }
 
+async function loadGuildMembers() {
+    tableData.members = await fetchGuildMembers();
+    renderSortedTable("members");
+}
+
 async function loadDashboard() {
     try {
         await loadGuildOverview();
         await loadLevelChanges();
         await loadGuildMovementTables();
+        await loadGuildMembers();
     } catch (error) {
         console.error(error);
 
@@ -645,6 +693,12 @@ async function loadDashboard() {
                 <td colspan="5">Unable to load rank changes.</td>
             </tr>
         `;
+        
+        guildMembersTableElement.innerHTML = `
+            <tr>
+                <td colspan="4">Unable to load guild members.</td>
+            </tr>
+`;
     }
 }
 

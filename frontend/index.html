@@ -213,7 +213,34 @@
                 </table>
             </div>
         </section>
-        
+
+        <section class="table-section">
+            <div class="section-header">
+                <div>
+                    <h2>Guild Members</h2>
+                    <p>Current guild roster from the latest available snapshot.</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper guild-members-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-table="members" data-sort-key="character_name">Character</th>
+                            <th class="sortable" data-table="members" data-sort-key="vocation">Vocation</th>
+                            <th class="sortable" data-table="members" data-sort-key="guild_rank">Guild Rank</th>
+                            <th class="sortable" data-table="members" data-sort-key="current_level">Current Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guild-members-table">
+                        <tr>
+                            <td colspan="4">Loading guild members...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <footer class="site-footer">

@@ -241,16 +241,25 @@ td {
     }
 }
 
-.level-changes-scroll {
+.level-changes-scroll,
+.guild-members-scroll {
+    height: 520px;
     max-height: 520px;
     overflow-y: auto;
+    overflow-x: auto;
 }
 
-.level-changes-scroll thead th {
+.level-changes-scroll thead th,
+.guild-members-scroll thead th {
     position: sticky;
     top: 0;
     background: var(--panel);
     z-index: 1;
+}
+
+.level-changes-scroll table,
+.guild-members-scroll table {
+    width: 100%;
 }
 
 .sortable {
