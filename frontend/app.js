@@ -8,10 +8,6 @@ const overviewMaxLevelElement = document.getElementById("overview-max-level");
 const overviewMinLevelElement = document.getElementById("overview-min-level");
 const overviewAverageLevelElement = document.getElementById("overview-average-level");
 
-const overviewStartDateElement = document.getElementById("overview-start-date");
-const overviewEndDateElement = document.getElementById("overview-end-date");
-const applyOverviewFilterButton = document.getElementById("apply-overview-filter");
-
 const levelChangesTableElement = document.getElementById("level-changes-table");
 
 const guildJoinsTableElement = document.getElementById("guild-joins-table");
@@ -207,8 +203,6 @@ function timestampToDateInputValue(timestamp) {
 
 function applyDateInputBounds(minDate, maxDate) {
     const dateInputs = [
-        overviewStartDateElement,
-        overviewEndDateElement,
         levelStartDateElement,
         levelEndDateElement,
         joinsStartDateElement,
@@ -248,15 +242,12 @@ function setDefaultDateRanges() {
     const defaultStartDate = formatDateInputValue(getDateDaysAgo(7));
     const defaultEndDate = formatDateInputValue(new Date());
 
-    const minAllowedDate = overviewStartDateElement.min || levelStartDateElement.min;
+    const minAllowedDate = levelStartDateElement.min;
 
     const safeStartDate =
         minAllowedDate && defaultStartDate < minAllowedDate
             ? minAllowedDate
             : defaultStartDate;
-
-    overviewStartDateElement.value = safeStartDate;
-    overviewEndDateElement.value = defaultEndDate;
 
     levelStartDateElement.value = safeStartDate;
     levelEndDateElement.value = defaultEndDate;
@@ -316,15 +307,6 @@ async function fetchSnapshotDateBounds() {
     };
 }
 
-async function fetchSummary() {
-    if (DATA_SOURCE === "supabase") {
-        const rows = await fetchSupabase("api_summary", "select=*");
-        return rows[0] || {};
-    }
-
-    return fetchFastApi("/api/summary");
-}
-
 async function fetchLevelChanges(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
         const query = buildSupabaseDateRangeQuery(
@@ -377,15 +359,12 @@ async function fetchRankChanges(dateRange = null) {
     return fetchFastApi("/api/rank-changes");
 }
 
-async function fetchGuildOverview(dateRange = null) {
+async function fetchGuildOverview() {
     if (DATA_SOURCE === "supabase") {
-        const query = buildSupabaseDateRangeQuery(
-            "select=*&order=snapshot_time.desc&limit=1",
-            dateRange,
-            "snapshot_time"
+        return fetchSupabase(
+            "api_guild_overview_by_snapshot",
+            "select=*&order=snapshot_time.desc&limit=1"
         );
-
-        return fetchSupabase("api_guild_overview_by_snapshot", query);
     }
 
     return [];
@@ -415,8 +394,7 @@ function renderGuildOverview(rows) {
 }
 
 async function loadGuildOverview() {
-    const dateRange = getDateRange(overviewStartDateElement, overviewEndDateElement);
-    const overviewRows = await fetchGuildOverview(dateRange);
+    const overviewRows = await fetchGuildOverview();
     renderGuildOverview(overviewRows);
 }
 
@@ -674,7 +652,6 @@ document.querySelectorAll(".sortable").forEach((header) => {
     header.addEventListener("click", handleTableSort);
 });
 
-applyOverviewFilterButton.addEventListener("click", loadGuildOverview);
 applyLevelFilterButton.addEventListener("click", loadLevelChanges);
 applyJoinsFilterButton.addEventListener("click", loadGuildJoins);
 applyLeavesFilterButton.addEventListener("click", loadGuildLeaves);
