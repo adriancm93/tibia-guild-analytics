@@ -85,22 +85,22 @@ function renderGuildJoinsTable(guildJoins) {
     if (!guildJoins.length) {
         guildJoinsTableElement.innerHTML = `
             <tr>
-                <td colspan="6">No guild joins found between the latest two snapshots.</td>
+                <td colspan="6">No guild joins found within the selected date range.</td>
             </tr>
         `;
         return;
     }
 
     guildJoinsTableElement.innerHTML = guildJoins
-        .map((row) => {
+        .map((guildJoin) => {
             return `
                 <tr>
-                    <td>${row.character_name}</td>
-                    <td>${row.vocation}</td>
-                    <td>${row.level}</td>
-                    <td>${row.guild_rank}</td>
-                    <td>${row.status}</td>
-                    <td>${formatNullableDate(row.joined_date)}</td>
+                    <td>${guildJoin.character_name}</td>
+                    <td>${guildJoin.vocation || ""}</td>
+                    <td>${guildJoin.level ?? ""}</td>
+                    <td>${guildJoin.guild_rank || ""}</td>
+                    <td>${guildJoin.status || ""}</td>
+                    <td>${formatTimestamp(guildJoin.latest_snapshot_time)}</td>
                 </tr>
             `;
         })
@@ -111,22 +111,22 @@ function renderGuildLeavesTable(guildLeaves) {
     if (!guildLeaves.length) {
         guildLeavesTableElement.innerHTML = `
             <tr>
-                <td colspan="6">No guild leaves found between the latest two snapshots.</td>
+                <td colspan="6">No guild leaves found within the selected date range.</td>
             </tr>
         `;
         return;
     }
 
     guildLeavesTableElement.innerHTML = guildLeaves
-        .map((row) => {
+        .map((guildLeave) => {
             return `
                 <tr>
-                    <td>${row.character_name}</td>
-                    <td>${row.vocation}</td>
-                    <td>${row.level}</td>
-                    <td>${row.guild_rank}</td>
-                    <td>${row.status}</td>
-                    <td>${formatNullableDate(row.joined_date)}</td>
+                    <td>${guildLeave.character_name}</td>
+                    <td>${guildLeave.vocation || ""}</td>
+                    <td>${guildLeave.level ?? ""}</td>
+                    <td>${guildLeave.guild_rank || ""}</td>
+                    <td>${guildLeave.status || ""}</td>
+                    <td>${formatTimestamp(guildLeave.latest_snapshot_time)}</td>
                 </tr>
             `;
         })
@@ -717,6 +717,5 @@ initializeDateBounds()
         return loadDashboard();
     })
     .catch((error) => {
-        apiStatusElement.textContent = `Unable to initialize dashboard: ${error.message}`;
-        apiStatusElement.className = "error";
+        console.error("Unable to initialize dashboard:", error);
     });
