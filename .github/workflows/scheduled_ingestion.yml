@@ -1,28 +1,21 @@
-name: Scheduled Supabase Ingestion
+name: Scheduled Supabase Batch Guild Ingestion
 
 on:
-  workflow_dispatch:
   schedule:
-    # Runs every 15 minutes, offset from common round times.
-    # GitHub Actions scheduled workflows use UTC.
-    - cron: "7,22,37,52 * * * *"
+    # Runs every 2 hours at minute 17 UTC
+    - cron: "17 */2 * * *"
+
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  RAW_DATA_DIR: data/raw
+  GUILD_BATCH_SIZE: 25
 
 jobs:
-  run-ingestion:
-    name: Run Tibia guild ingestion
+  run-batch-guild-ingestion:
+    name: Run batch guild ingestion
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    env:
-      TIBIA_GUILD_NAME: ${{ secrets.TIBIA_GUILD_NAME }}
-      TIBIA_WORLD: ${{ secrets.TIBIA_WORLD }}
-      RAW_DATA_DIR: data/raw
-
-      POSTGRES_HOST: ${{ secrets.SUPABASE_DB_HOST }}
-      POSTGRES_PORT: ${{ secrets.SUPABASE_DB_PORT }}
-      POSTGRES_DB: ${{ secrets.SUPABASE_DB_NAME }}
-      POSTGRES_USER: ${{ secrets.SUPABASE_DB_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
     steps:
       - name: Check out repository
@@ -39,36 +32,28 @@ jobs:
           python -m pip install -r ingestion/requirements-ci.txt
 
       - name: Confirm environment configuration
+        env:
+          POSTGRES_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          POSTGRES_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+          POSTGRES_DB: ${{ secrets.SUPABASE_DB_NAME }}
+          POSTGRES_USER: ${{ secrets.SUPABASE_DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          python - <<'PY'
-          import os
+          test -n "$POSTGRES_HOST"
+          test -n "$POSTGRES_PORT"
+          test -n "$POSTGRES_DB"
+          test -n "$POSTGRES_USER"
+          test -n "$POSTGRES_PASSWORD"
+          echo "Environment configuration found."
 
-          required_vars = [
-              "TIBIA_GUILD_NAME",
-              "TIBIA_WORLD",
-              "RAW_DATA_DIR",
-              "POSTGRES_HOST",
-              "POSTGRES_PORT",
-              "POSTGRES_DB",
-              "POSTGRES_USER",
-              "POSTGRES_PASSWORD",
-          ]
-
-          missing = [var for var in required_vars if not os.getenv(var)]
-
-          if missing:
-              raise SystemExit(f"Missing required environment variables: {missing}")
-
-          print("Environment configuration found.")
-          print(f"Guild: {os.getenv('TIBIA_GUILD_NAME')}")
-          print(f"World: {os.getenv('TIBIA_WORLD')}")
-          print(f"Raw data directory: {os.getenv('RAW_DATA_DIR')}")
-          print(f"Database host configured: {bool(os.getenv('POSTGRES_HOST'))}")
-          print(f"Database name: {os.getenv('POSTGRES_DB')}")
-          PY
-
-      - name: Extract latest guild data
-        run: python ingestion/src/main.py
-
-      - name: Load latest snapshot to Supabase Postgres
-        run: python ingestion/src/load_postgres.py
+      - name: Run batch guild ingestion
+        env:
+          POSTGRES_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          POSTGRES_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+          POSTGRES_DB: ${{ secrets.SUPABASE_DB_NAME }}
+          POSTGRES_USER: ${{ secrets.SUPABASE_DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          RAW_DATA_DIR: data/raw
+          GUILD_BATCH_SIZE: 25
+        run: |
+          python ingestion/src/run_batch_guild_ingestion.py
