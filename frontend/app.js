@@ -1,5 +1,9 @@
 const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || "http://127.0.0.1:8000";
 
+const worldSelectElement = document.getElementById("world-select");
+const guildSelectElement = document.getElementById("guild-select");
+const applyGuildSelectionButton = document.getElementById("apply-guild-selection");
+
 const overviewGuildNameElement = document.getElementById("overview-guild-name");
 const overviewWorldNameElement = document.getElementById("overview-world-name");
 const overviewLatestRefreshElement = document.getElementById("overview-latest-refresh");
@@ -29,6 +33,10 @@ const applyLeavesFilterButton = document.getElementById("apply-leaves-filter");
 const rankStartDateElement = document.getElementById("rank-start-date");
 const rankEndDateElement = document.getElementById("rank-end-date");
 const applyRankFilterButton = document.getElementById("apply-rank-filter");
+
+let selectedWorld = "Lobera";
+let selectedGuild = "Black Clover";
+let availableGuilds = [];
 
 let currentLevelChanges = [];
 
@@ -62,6 +70,18 @@ const tableSortState = {
         direction: "desc"
     }
 };
+
+function encodeFilterValue(value) {
+    return encodeURIComponent(value);
+}
+
+function buildGuildFilterQuery() {
+    return `world=eq.${encodeFilterValue(selectedWorld)}&guild_name=eq.${encodeFilterValue(selectedGuild)}`;
+}
+
+function appendGuildFilters(baseQuery) {
+    return `${baseQuery}&${buildGuildFilterQuery()}`;
+}
 
 function formatNullableDate(value) {
     if (!value) {
@@ -300,9 +320,31 @@ async function fetchSupabase(viewName, queryString = "select=*") {
 
     return response.json();
 }
+
 async function fetchSnapshotDateBounds() {
+    return fetchSnapshotDateBoundsForSelectedGuild();
+}
+
+async function fetchWorlds() {
     if (DATA_SOURCE === "supabase") {
-        const rows = await fetchSupabase("api_snapshot_date_bounds", "select=*");
+        return fetchSupabase("api_worlds", "select=*&order=world_name.asc");
+    }
+
+    return [];
+}
+
+async function fetchGuilds() {
+    if (DATA_SOURCE === "supabase") {
+        return fetchSupabase("api_guilds", "select=*&order=world.asc,guild_name.asc");
+    }
+
+    return [];
+}
+
+async function fetchSnapshotDateBoundsForSelectedGuild() {
+    if (DATA_SOURCE === "supabase") {
+        const query = appendGuildFilters("select=*");
+        const rows = await fetchSupabase("api_snapshot_date_bounds_by_guild", query);
         return rows[0] || {};
     }
 
@@ -314,10 +356,11 @@ async function fetchSnapshotDateBounds() {
 
 async function fetchLevelChanges(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        const query = buildSupabaseDateRangeQuery(
-            "select=*&order=latest_snapshot_time.desc,level_gain.desc,current_level.desc",
-            dateRange
+        let query = appendGuildFilters(
+            "select=*&order=latest_snapshot_time.desc,level_gain.desc,current_level.desc"
         );
+
+        query = buildSupabaseDateRangeQuery(query, dateRange);
 
         return fetchSupabase("api_historical_character_level_changes", query);
     }
@@ -327,10 +370,11 @@ async function fetchLevelChanges(dateRange = null) {
 
 async function fetchGuildJoins(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        const query = buildSupabaseDateRangeQuery(
-            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc",
-            dateRange
+        let query = appendGuildFilters(
+            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc"
         );
+
+        query = buildSupabaseDateRangeQuery(query, dateRange);
 
         return fetchSupabase("api_historical_guild_joins", query);
     }
@@ -340,10 +384,11 @@ async function fetchGuildJoins(dateRange = null) {
 
 async function fetchGuildLeaves(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        const query = buildSupabaseDateRangeQuery(
-            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc",
-            dateRange
+        let query = appendGuildFilters(
+            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc"
         );
+
+        query = buildSupabaseDateRangeQuery(query, dateRange);
 
         return fetchSupabase("api_historical_guild_leaves", query);
     }
@@ -353,10 +398,11 @@ async function fetchGuildLeaves(dateRange = null) {
 
 async function fetchRankChanges(dateRange = null) {
     if (DATA_SOURCE === "supabase") {
-        const query = buildSupabaseDateRangeQuery(
-            "select=*&order=latest_snapshot_time.desc,character_name.asc",
-            dateRange
+        let query = appendGuildFilters(
+            "select=*&order=latest_snapshot_time.desc,character_name.asc"
         );
+
+        query = buildSupabaseDateRangeQuery(query, dateRange);
 
         return fetchSupabase("api_historical_rank_changes", query);
     }
@@ -366,10 +412,11 @@ async function fetchRankChanges(dateRange = null) {
 
 async function fetchGuildMembers() {
     if (DATA_SOURCE === "supabase") {
-        return fetchSupabase(
-            "api_latest_guild_members",
+        const query = appendGuildFilters(
             "select=*&order=current_level.desc,character_name.asc"
         );
+
+        return fetchSupabase("api_latest_guild_members", query);
     }
 
     return [];
@@ -377,10 +424,11 @@ async function fetchGuildMembers() {
 
 async function fetchGuildOverview() {
     if (DATA_SOURCE === "supabase") {
-        return fetchSupabase(
-            "api_guild_overview_by_snapshot",
+        const query = appendGuildFilters(
             "select=*&order=snapshot_time.desc&limit=1"
         );
+
+        return fetchSupabase("api_guild_overview_by_snapshot", query);
     }
 
     return [];
@@ -619,6 +667,66 @@ function renderGuildMembersTable(members) {
         .join("");
 }
 
+function renderWorldOptions(worlds) {
+    worldSelectElement.innerHTML = worlds
+        .map((world) => {
+            const selected = world.world_name === selectedWorld ? "selected" : "";
+
+            return `
+                <option value="${world.world_name}" ${selected}>
+                    ${world.world_name}
+                </option>
+            `;
+        })
+        .join("");
+}
+
+function renderGuildOptions() {
+    const guildsForWorld = availableGuilds.filter((guild) => {
+        return guild.world === selectedWorld;
+    });
+
+    if (
+        !guildsForWorld.some((guild) => guild.guild_name === selectedGuild) &&
+        guildsForWorld.length
+    ) {
+        selectedGuild = guildsForWorld[0].guild_name;
+    }
+
+    guildSelectElement.innerHTML = guildsForWorld
+        .map((guild) => {
+            const selected = guild.guild_name === selectedGuild ? "selected" : "";
+
+            return `
+                <option value="${guild.guild_name}" ${selected}>
+                    ${guild.guild_name}
+                </option>
+            `;
+        })
+        .join("");
+}
+
+async function loadGuildSelectors() {
+    const [worlds, guilds] = await Promise.all([
+        fetchWorlds(),
+        fetchGuilds()
+    ]);
+
+    availableGuilds = guilds;
+
+    renderWorldOptions(worlds);
+    renderGuildOptions();
+}
+
+async function applySelectedGuild() {
+    selectedWorld = worldSelectElement.value;
+    selectedGuild = guildSelectElement.value;
+
+    await initializeDateBounds();
+    setDefaultDateRanges();
+    await loadDashboard();
+}
+
 async function loadLevelChanges() {
     const dateRange = getDateRange(levelStartDateElement, levelEndDateElement);
     const rawLevelChanges = await fetchLevelChanges(dateRange);
@@ -706,12 +814,24 @@ document.querySelectorAll(".sortable").forEach((header) => {
     header.addEventListener("click", handleTableSort);
 });
 
+worldSelectElement.addEventListener("change", () => {
+    selectedWorld = worldSelectElement.value;
+    renderGuildOptions();
+});
+
+guildSelectElement.addEventListener("change", () => {
+    selectedGuild = guildSelectElement.value;
+});
+
 applyLevelFilterButton.addEventListener("click", loadLevelChanges);
 applyJoinsFilterButton.addEventListener("click", loadGuildJoins);
 applyLeavesFilterButton.addEventListener("click", loadGuildLeaves);
 applyRankFilterButton.addEventListener("click", loadRankChanges);
+applyGuildSelectionButton.addEventListener("click", applySelectedGuild);
 
-initializeDateBounds()
+
+loadGuildSelectors()
+    .then(() => initializeDateBounds())
     .then(() => {
         setDefaultDateRanges();
         return loadDashboard();

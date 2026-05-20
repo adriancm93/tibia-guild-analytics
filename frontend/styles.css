@@ -66,6 +66,40 @@ h2 {
     font-size: 24px;
 }
 
+.selector-section {
+    padding: 24px;
+}
+
+.guild-selector {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.guild-selector label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.guild-selector select {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--panel-light);
+    color: var(--text);
+    min-width: 220px;
+}
+
+.guild-selector select:focus {
+    outline: 2px solid var(--accent-soft);
+    border-color: var(--accent);
+}
+
 .status-card,
 .card,
 .table-section {
@@ -239,7 +273,18 @@ td {
     .date-filter input {
         width: 100%;
     }
+    .guild-selector {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .guild-selector button,
+    .guild-selector select {
+        width: 100%;
+    }
 }
+
 
 .level-changes-scroll,
 .guild-members-scroll {
