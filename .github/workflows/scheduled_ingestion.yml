@@ -2,15 +2,19 @@ name: Scheduled Supabase Batch Guild Ingestion
 
 on:
   schedule:
-    # Runs every 2 hours at minute 17 UTC
-    - cron: "17 */2 * * *"
+    # Runs every 30 minutes at the 17th and 47th minute of the hour
+    - cron: "17,47 * * * *"
 
   workflow_dispatch:
 
+concurrency:
+  group: scheduled-supabase-batch-guild-ingestion
+  cancel-in-progress: false
+  
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   RAW_DATA_DIR: data/raw
-  GUILD_BATCH_SIZE: 25
+  GUILD_BATCH_SIZE: 50
 
 jobs:
   run-batch-guild-ingestion:
@@ -54,6 +58,6 @@ jobs:
           POSTGRES_USER: ${{ secrets.SUPABASE_DB_USER }}
           POSTGRES_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           RAW_DATA_DIR: data/raw
-          GUILD_BATCH_SIZE: 25
+          GUILD_BATCH_SIZE: 50
         run: |
           python ingestion/src/run_batch_guild_ingestion.py
