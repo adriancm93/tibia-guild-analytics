@@ -189,9 +189,7 @@ def insert_member_snapshot_rows(
     with engine.begin() as connection:
         connection.execute(query, member_rows)
 
-
-def load_latest_snapshot_to_postgres() -> None:
-    snapshot_path = find_latest_raw_guild_snapshot()
+def load_snapshot_to_postgres(snapshot_path: Path) -> None:
     payload = read_raw_snapshot(snapshot_path)
 
     metadata = payload["metadata"]
@@ -233,6 +231,10 @@ def load_latest_snapshot_to_postgres() -> None:
 
     print("Snapshot loaded successfully.")
     print(f"Inserted member rows: {len(member_rows)}")
+    
+def load_latest_snapshot_to_postgres() -> None:
+    snapshot_path = find_latest_raw_guild_snapshot()
+    load_snapshot_to_postgres(snapshot_path)
 
 
 if __name__ == "__main__":

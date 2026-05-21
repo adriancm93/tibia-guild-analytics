@@ -10,8 +10,7 @@ from sqlalchemy.engine import Engine
 
 from extract_guild import extract_guild
 from load_raw_local import save_raw_json
-from load_postgres import load_latest_snapshot_to_postgres
-
+from load_postgres import load_snapshot_to_postgres
 
 def get_database_engine() -> Engine:
     """Create a SQLAlchemy engine from environment variables."""
@@ -168,13 +167,13 @@ def refresh_one_guild(engine: Engine, guild: dict[str, Any]) -> None:
 
     raw_data_dir = os.getenv("RAW_DATA_DIR", "data/raw")
 
-    save_raw_json(
+    snapshot_path = save_raw_json(
         data=payload,
         raw_data_dir=raw_data_dir,
         entity_name=guild_name,
     )
 
-    load_latest_snapshot_to_postgres()
+    load_snapshot_to_postgres(snapshot_path)
 
     mark_guild_success(engine, guild["guild_id"])
 
