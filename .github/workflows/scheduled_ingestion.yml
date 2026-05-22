@@ -3,7 +3,7 @@ name: Scheduled Supabase Batch Guild Ingestion
 on:
   schedule:
     # Runs every 30 minutes at the 17th and 47th minute of the hour
-    - cron: "17,47 * * * *"
+    - cron: "7,22,37,52 * * * *"
 
   workflow_dispatch:
 
