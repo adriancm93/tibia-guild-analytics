@@ -120,7 +120,7 @@ function renderGuildJoinsTable(guildJoins) {
                     <td>${guildJoin.level ?? ""}</td>
                     <td>${guildJoin.guild_rank || ""}</td>
                     <td>${guildJoin.status || ""}</td>
-                    <td>${formatTimestamp(guildJoin.latest_snapshot_time)}</td>
+                    <td>${formatChicagoDate(guildJoin.latest_snapshot_time)}</td>
                 </tr>
             `;
         })
@@ -146,7 +146,7 @@ function renderGuildLeavesTable(guildLeaves) {
                     <td>${guildLeave.level ?? ""}</td>
                     <td>${guildLeave.guild_rank || ""}</td>
                     <td>${guildLeave.status || ""}</td>
-                    <td>${formatTimestamp(guildLeave.latest_snapshot_time)}</td>
+                    <td>${formatChicagoDate(guildLeave.latest_snapshot_time)}</td>
                 </tr>
             `;
         })
@@ -157,25 +157,70 @@ function renderRankChangesTable(rankChanges) {
     if (!rankChanges.length) {
         rankChangesTableElement.innerHTML = `
             <tr>
-                <td colspan="5">No rank changes found between the latest two snapshots.</td>
+                <td colspan="5">No rank changes found within the selected date range.</td>
             </tr>
         `;
         return;
     }
 
     rankChangesTableElement.innerHTML = rankChanges
-        .map((row) => {
+        .map((rankChange) => {
             return `
                 <tr>
-                    <td>${row.character_name}</td>
-                    <td>${row.previous_guild_rank}</td>
-                    <td>${row.current_guild_rank}</td>
-                    <td>${formatTimestamp(row.previous_snapshot_time)}</td>
-                    <td>${formatTimestamp(row.latest_snapshot_time)}</td>
+                    <td>${rankChange.character_name}</td>
+                    <td>${rankChange.previous_guild_rank || ""}</td>
+                    <td>${rankChange.current_guild_rank || ""}</td>
+                    <td>${formatChicagoDate(rankChange.previous_snapshot_time)}</td>
+                    <td>${formatChicagoDate(rankChange.latest_snapshot_time)}</td>
                 </tr>
             `;
         })
         .join("");
+}
+
+function formatChicagoDate(timestamp) {
+    if (!timestamp) {
+        return "Not available";
+    }
+
+    const date = new Date(timestamp);
+
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "short",
+        day: "2-digit"
+    }).format(date);
+}
+
+function formatRefreshAge(timestamp) {
+    if (!timestamp) {
+        return "Not available";
+    }
+
+    const refreshedAt = new Date(timestamp);
+    const now = new Date();
+
+    const diffMilliseconds = now - refreshedAt;
+
+    if (diffMilliseconds < 0) {
+        return "Just now";
+    }
+
+    const totalMinutes = Math.floor(diffMilliseconds / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m ago`;
+    }
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m ago`;
+    }
+
+    return `${minutes}m ago`;
 }
 
 function formatTimestamp(timestamp) {
@@ -450,7 +495,7 @@ function renderGuildOverview(rows) {
 
     overviewGuildNameElement.textContent = overview.guild_name;
     overviewWorldNameElement.textContent = overview.world;
-    overviewLatestRefreshElement.textContent = formatTimestamp(overview.snapshot_time);
+    overviewLatestRefreshElement.textContent = formatRefreshAge(overview.snapshot_time);
     overviewMemberCountElement.textContent = overview.number_of_members;
     overviewMaxLevelElement.textContent = overview.max_level;
     overviewMinLevelElement.textContent = overview.min_level;
@@ -661,7 +706,7 @@ function renderGuildMembersTable(members) {
                     <td>${member.vocation || ""}</td>
                     <td>${member.guild_rank || ""}</td>
                     <td>${member.current_level ?? ""}</td>
-                    <td>${member.last_connected_at ? formatTimestamp(member.last_connected_at) : "Not available"}</td>
+                    <td>${formatChicagoDate(member.last_connected_at)}</td>
                 </tr>
             `;
         })
