@@ -647,7 +647,7 @@ function renderGuildMembersTable(members) {
     if (!members.length) {
         guildMembersTableElement.innerHTML = `
             <tr>
-                <td colspan="4">No guild members found.</td>
+                <td colspan="5">No guild members found.</td>
             </tr>
         `;
         return;
@@ -661,6 +661,7 @@ function renderGuildMembersTable(members) {
                     <td>${member.vocation || ""}</td>
                     <td>${member.guild_rank || ""}</td>
                     <td>${member.current_level ?? ""}</td>
+                    <td>${member.last_connected_at ? formatTimestamp(member.last_connected_at) : "Not available"}</td>
                 </tr>
             `;
         })
@@ -804,7 +805,7 @@ async function loadDashboard() {
         
         guildMembersTableElement.innerHTML = `
             <tr>
-                <td colspan="4">Unable to load guild members.</td>
+                <td colspan="5">Unable to load guild members.</td>
             </tr>
 `;
     }
