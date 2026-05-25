@@ -105,7 +105,7 @@ function renderGuildJoinsTable(guildJoins) {
     if (!guildJoins.length) {
         guildJoinsTableElement.innerHTML = `
             <tr>
-                <td colspan="6">No guild joins found within the selected date range.</td>
+                <td colspan="5">No guild joins found within the selected date range.</td>
             </tr>
         `;
         return;
@@ -119,7 +119,6 @@ function renderGuildJoinsTable(guildJoins) {
                     <td>${guildJoin.vocation || ""}</td>
                     <td>${guildJoin.level ?? ""}</td>
                     <td>${guildJoin.guild_rank || ""}</td>
-                    <td>${guildJoin.status || ""}</td>
                     <td>${formatChicagoDate(guildJoin.latest_snapshot_time)}</td>
                 </tr>
             `;
@@ -131,7 +130,7 @@ function renderGuildLeavesTable(guildLeaves) {
     if (!guildLeaves.length) {
         guildLeavesTableElement.innerHTML = `
             <tr>
-                <td colspan="6">No guild leaves found within the selected date range.</td>
+                <td colspan="5">No guild leaves found within the selected date range.</td>
             </tr>
         `;
         return;
@@ -145,7 +144,6 @@ function renderGuildLeavesTable(guildLeaves) {
                     <td>${guildLeave.vocation || ""}</td>
                     <td>${guildLeave.level ?? ""}</td>
                     <td>${guildLeave.guild_rank || ""}</td>
-                    <td>${guildLeave.status || ""}</td>
                     <td>${formatChicagoDate(guildLeave.latest_snapshot_time)}</td>
                 </tr>
             `;
@@ -157,7 +155,7 @@ function renderRankChangesTable(rankChanges) {
     if (!rankChanges.length) {
         rankChangesTableElement.innerHTML = `
             <tr>
-                <td colspan="5">No rank changes found within the selected date range.</td>
+                <td colspan="4">No rank changes found within the selected date range.</td>
             </tr>
         `;
         return;
@@ -170,7 +168,6 @@ function renderRankChangesTable(rankChanges) {
                     <td>${rankChange.character_name}</td>
                     <td>${rankChange.previous_guild_rank || ""}</td>
                     <td>${rankChange.current_guild_rank || ""}</td>
-                    <td>${formatChicagoDate(rankChange.previous_snapshot_time)}</td>
                     <td>${formatChicagoDate(rankChange.latest_snapshot_time)}</td>
                 </tr>
             `;
@@ -877,19 +874,19 @@ async function loadDashboard() {
 
         guildJoinsTableElement.innerHTML = `
             <tr>
-                <td colspan="6">Unable to load guild joins.</td>
+                <td colspan="5">Unable to load guild joins.</td>
             </tr>
         `;
 
         guildLeavesTableElement.innerHTML = `
             <tr>
-                <td colspan="6">Unable to load guild leaves.</td>
+                <td colspan="5">Unable to load guild leaves.</td>
             </tr>
         `;
 
         rankChangesTableElement.innerHTML = `
             <tr>
-                <td colspan="5">Unable to load rank changes.</td>
+                <td colspan="4">Unable to load rank changes.</td>
             </tr>
         `;
         
