@@ -140,25 +140,33 @@ def upsert_guilds(engine: Engine, world: str, guild_names: list[str]) -> None:
 
 def discover_worlds_and_guilds(
     max_worlds: int | None = None,
+    discovery_world: str | None = None,
     sleep_seconds: float = 1.0,
 ) -> None:
     """
     Discover worlds and guilds, then load metadata into Postgres.
 
     max_worlds is useful for testing without scanning every world.
+    discovery_world is useful for refreshing guild metadata for one specific world.
     """
     engine = get_database_engine()
 
-    print("Extracting worlds...")
-    worlds_payload = extract_worlds()
-    world_names = extract_world_names(worlds_payload)
+    if discovery_world:
+        world_names = [discovery_world]
+        print(f"Discovering guilds for one world only: {discovery_world}")
 
-    if max_worlds is not None:
-        world_names = world_names[:max_worlds]
+        upsert_worlds(engine, world_names)
+    else:
+        print("Extracting worlds...")
+        worlds_payload = extract_worlds()
+        world_names = extract_world_names(worlds_payload)
 
-    print(f"Found {len(world_names)} worlds.")
+        if max_worlds is not None:
+            world_names = world_names[:max_worlds]
 
-    upsert_worlds(engine, world_names)
+        print(f"Found {len(world_names)} worlds.")
+
+        upsert_worlds(engine, world_names)
 
     total_guilds = 0
 
@@ -180,7 +188,11 @@ def discover_worlds_and_guilds(
 
 if __name__ == "__main__":
     max_worlds_value = os.getenv("DISCOVERY_MAX_WORLDS")
+    discovery_world = os.getenv("DISCOVERY_WORLD")
 
     max_worlds = int(max_worlds_value) if max_worlds_value else None
 
-    discover_worlds_and_guilds(max_worlds=max_worlds)
+    discover_worlds_and_guilds(
+        max_worlds=max_worlds,
+        discovery_world=discovery_world,
+    )
