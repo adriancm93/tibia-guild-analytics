@@ -34,6 +34,15 @@ const rankStartDateElement = document.getElementById("rank-start-date");
 const rankEndDateElement = document.getElementById("rank-end-date");
 const applyRankFilterButton = document.getElementById("apply-rank-filter");
 
+const levelCharacterFilterElement = document.getElementById("level-character-filter");
+const membersCharacterFilterElement = document.getElementById("members-character-filter");
+
+const levelCharacterFilterMenuElement = document.getElementById("level-character-filter-menu");
+const membersCharacterFilterMenuElement = document.getElementById("members-character-filter-menu");
+
+const clearLevelCharacterFilterButton = document.getElementById("clear-level-character-filter");
+const clearMembersCharacterFilterButton = document.getElementById("clear-members-character-filter");
+
 let selectedWorld = "Lobera";
 let selectedGuild = "Black Clover";
 let availableGuilds = [];
@@ -565,10 +574,31 @@ function compareValues(a, b, direction) {
     return 0;
 }
 
+function getFilteredTableData(tableName) {
+    let rows = [...tableData[tableName]];
+
+    if (tableName === "level") {
+        rows = filterRowsByCharacterName(
+            rows,
+            levelCharacterFilterElement?.value
+        );
+    }
+
+    if (tableName === "members") {
+        rows = filterRowsByCharacterName(
+            rows,
+            membersCharacterFilterElement?.value
+        );
+    }
+
+    return rows;
+}
+
 function getSortedTableData(tableName) {
     const { key, direction } = tableSortState[tableName];
+    const rows = getFilteredTableData(tableName);
 
-    return [...tableData[tableName]].sort((a, b) => {
+    return rows.sort((a, b) => {
         return compareValues(a[key], b[key], direction);
     });
 }
@@ -625,6 +655,88 @@ function renderSortedTable(tableName) {
     }
 
     updateSortHeaderStyles();
+}
+
+function closeAllColumnFilterMenus() {
+    levelCharacterFilterMenuElement?.classList.remove("open");
+    membersCharacterFilterMenuElement?.classList.remove("open");
+}
+
+function toggleColumnFilterMenu(tableName) {
+    const targetMenu =
+        tableName === "level"
+            ? levelCharacterFilterMenuElement
+            : membersCharacterFilterMenuElement;
+
+    const isOpen = targetMenu?.classList.contains("open");
+
+    closeAllColumnFilterMenus();
+
+    if (!isOpen) {
+        targetMenu?.classList.add("open");
+
+        if (tableName === "level") {
+            levelCharacterFilterElement?.focus();
+        }
+
+        if (tableName === "members") {
+            membersCharacterFilterElement?.focus();
+        }
+    }
+}
+
+document.querySelectorAll(".column-filter-button").forEach((button) => {
+    button.addEventListener("click", (event) => {
+        event.stopPropagation();
+
+        const tableName = button.dataset.filterTable;
+        toggleColumnFilterMenu(tableName);
+    });
+});
+
+levelCharacterFilterElement?.addEventListener("input", () => {
+    renderSortedTable("level");
+});
+
+membersCharacterFilterElement?.addEventListener("input", () => {
+    renderSortedTable("members");
+});
+
+clearLevelCharacterFilterButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    clearCharacterFilter("level");
+});
+
+clearMembersCharacterFilterButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    clearCharacterFilter("members");
+});
+
+document.addEventListener("click", (event) => {
+    const clickedInsideFilterMenu = event.target.closest(".column-filter-menu");
+    const clickedFilterButton = event.target.closest(".column-filter-button");
+
+    if (!clickedInsideFilterMenu && !clickedFilterButton) {
+        closeAllColumnFilterMenus();
+    }
+});
+
+document.querySelectorAll(".column-filter-menu").forEach((menu) => {
+    menu.addEventListener("click", (event) => {
+        event.stopPropagation();
+    });
+});
+
+function clearCharacterFilter(tableName) {
+    if (tableName === "level" && levelCharacterFilterElement) {
+        levelCharacterFilterElement.value = "";
+        renderSortedTable("level");
+    }
+
+    if (tableName === "members" && membersCharacterFilterElement) {
+        membersCharacterFilterElement.value = "";
+        renderSortedTable("members");
+    }
 }
 
 function handleTableSort(event) {
@@ -851,6 +963,20 @@ async function loadGuildMovementTables() {
 async function loadGuildMembers() {
     tableData.members = await fetchGuildMembers();
     renderSortedTable("members");
+}
+
+function filterRowsByCharacterName(rows, searchValue) {
+    const normalizedSearch = String(searchValue || "").trim().toLowerCase();
+
+    if (!normalizedSearch) {
+        return rows;
+    }
+
+    return rows.filter((row) => {
+        return String(row.character_name || "")
+            .toLowerCase()
+            .includes(normalizedSearch);
+    });
 }
 
 async function loadDashboard() {

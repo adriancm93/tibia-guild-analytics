@@ -80,7 +80,6 @@
                     <h2>Level Changes and Time Online</h2>
                     <p>Characters whose level changed within the selected snapshot date range.</p>
                 </div>
-
                 <div class="date-filter">
                     <label>
                         From
@@ -98,7 +97,25 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="sortable" data-table="level" data-sort-key="character_name">Character</th>
+                            <th class="sortable filterable-header" data-table="level" data-sort-key="character_name">
+                                <span>Character</span>
+                                <button
+                                    type="button"
+                                    class="column-filter-button"
+                                    data-filter-table="level"
+                                    aria-label="Filter level changes by character"
+                                >
+                                    🔍
+                                </button>
+                                <div class="column-filter-menu" id="level-character-filter-menu">
+                                    <input
+                                        id="level-character-filter"
+                                        type="search"
+                                        placeholder="Search character..."
+                                    />
+                                    <button type="button" id="clear-level-character-filter">Clear</button>
+                                </div>
+                            </th>
                             <th class="sortable" data-table="level" data-sort-key="vocation">Vocation</th>
                             <th class="sortable" data-table="level" data-sort-key="guild_rank">Guild Rank</th>
                             <th class="sortable" data-table="level" data-sort-key="previous_level">Previous Level</th>
@@ -247,7 +264,25 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="sortable" data-table="members" data-sort-key="character_name">Character</th>
+                            <th class="sortable filterable-header" data-table="members" data-sort-key="character_name">
+                                <span>Character</span>
+                                <button
+                                    type="button"
+                                    class="column-filter-button"
+                                    data-filter-table="members"
+                                    aria-label="Filter guild members by character"
+                                >
+                                    🔍
+                                </button>
+                                <div class="column-filter-menu" id="members-character-filter-menu">
+                                    <input
+                                        id="members-character-filter"
+                                        type="search"
+                                        placeholder="Search character..."
+                                    />
+                                    <button type="button" id="clear-members-character-filter">Clear</button>
+                                </div>
+                            </th>
                             <th class="sortable" data-table="members" data-sort-key="vocation">Vocation</th>
                             <th class="sortable" data-table="members" data-sort-key="guild_rank">Guild Rank</th>
                             <th class="sortable" data-table="members" data-sort-key="current_level">Current Level</th>
