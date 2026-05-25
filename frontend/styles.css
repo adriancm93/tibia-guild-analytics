@@ -374,3 +374,13 @@ td {
     border-top: 1px solid var(--border);
     padding-top: 24px;
 }
+
+.positive {
+    color: var(--accent);
+    font-weight: 800;
+}
+
+.negative {
+    color: #f87171;
+    font-weight: 800;
+}

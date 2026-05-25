@@ -178,6 +178,27 @@ function renderRankChangesTable(rankChanges) {
         .join("");
 }
 
+function formatOnlineMinutes(minutes) {
+    const totalMinutes = Number(minutes || 0);
+
+    if (totalMinutes <= 0) {
+        return "0m";
+    }
+
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+
+    if (hours > 0 && remainingMinutes > 0) {
+        return `${hours}h ${remainingMinutes}m`;
+    }
+
+    if (hours > 0) {
+        return `${hours}h`;
+    }
+
+    return `${remainingMinutes}m`;
+}
+
 function formatChicagoDate(timestamp) {
     if (!timestamp) {
         return "Not available";
@@ -577,6 +598,20 @@ function updateSortHeaderStyles() {
     });
 }
 
+function getLevelGainClass(levelGain) {
+    const gain = Number(levelGain || 0);
+
+    if (gain > 0) {
+        return "positive";
+    }
+
+    if (gain < 0) {
+        return "negative";
+    }
+
+    return "";
+}
+
 function renderSortedTable(tableName) {
     const sortedData = getSortedTableData(tableName);
 
@@ -620,6 +655,7 @@ function aggregateLevelChangesByCharacter(levelChanges) {
 
     levelChanges.forEach((row) => {
         const characterName = row.character_name;
+        const onlineMinutes = Number(row.estimated_online_minutes || 0);
 
         if (!characterMap.has(characterName)) {
             characterMap.set(characterName, {
@@ -629,6 +665,7 @@ function aggregateLevelChangesByCharacter(levelChanges) {
                 previous_level: row.previous_level,
                 current_level: row.current_level,
                 level_gain: Number(row.level_gain) || 0,
+                estimated_online_minutes: onlineMinutes,
                 first_snapshot_time: row.previous_snapshot_time,
                 latest_snapshot_time: row.latest_snapshot_time
             });
@@ -639,6 +676,11 @@ function aggregateLevelChangesByCharacter(levelChanges) {
         const existing = characterMap.get(characterName);
 
         existing.level_gain += Number(row.level_gain) || 0;
+
+        existing.estimated_online_minutes = Math.max(
+            Number(existing.estimated_online_minutes || 0),
+            onlineMinutes
+        );
 
         const rowPreviousTime = new Date(row.previous_snapshot_time).getTime();
         const existingFirstTime = new Date(existing.first_snapshot_time).getTime();
@@ -666,22 +708,25 @@ function renderLevelChangesTable(levelChanges) {
     if (!levelChanges.length) {
         levelChangesTableElement.innerHTML = `
             <tr>
-                <td colspan="6">No level changes found between the latest two snapshots.</td>
+                <td colspan="7">No level changes found within the selected date range.</td>
             </tr>
         `;
         return;
     }
 
     levelChangesTableElement.innerHTML = levelChanges
-        .map((row) => {
+        .map((levelChange) => {
             return `
                 <tr>
-                    <td>${row.character_name}</td>
-                    <td>${row.vocation}</td>
-                    <td>${row.guild_rank}</td>
-                    <td>${row.previous_level}</td>
-                    <td>${row.current_level}</td>
-                    <td class="level-gain">${formatLevelGain(row.level_gain)}</td>
+                    <td>${levelChange.character_name}</td>
+                    <td>${levelChange.vocation || ""}</td>
+                    <td>${levelChange.guild_rank || ""}</td>
+                    <td>${levelChange.previous_level ?? ""}</td>
+                    <td>${levelChange.current_level ?? ""}</td>
+                    <td class="${getLevelGainClass(levelChange.level_gain)}">
+                        ${Number(levelChange.level_gain) > 0 ? "+" : ""}${levelChange.level_gain}
+                    </td>
+                    <td>${formatOnlineMinutes(levelChange.estimated_online_minutes)}</td>
                 </tr>
             `;
         })
@@ -826,7 +871,7 @@ async function loadDashboard() {
 
         levelChangesTableElement.innerHTML = `
             <tr>
-                <td colspan="6">Unable to load level changes.</td>
+                <td colspan="7">Unable to load level changes and time online.</td>
             </tr>
         `;
 
