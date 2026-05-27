@@ -167,6 +167,17 @@ async function applyRetention(): Promise<number | null> {
   return data;
 }
 
+async function refreshTimeOnlineMaterializedView(): Promise<boolean> {
+  const { error } = await supabase.rpc("refresh_character_estimated_online_minutes");
+
+  if (error) {
+    console.error("Failed to refresh time online materialized view:", error);
+    return false;
+  }
+
+  return true;
+}
+
 async function loadGuildSnapshot(guild: ClaimedGuild): Promise<number> {
   const payload = await fetchGuild(guild.guild_name);
 
@@ -303,6 +314,7 @@ Deno.serve(async (request) => {
     }
 
     const deletedSnapshots = await applyRetention();
+    const timeOnlineRefreshSucceeded = await refreshTimeOnlineMaterializedView();
 
     return new Response(
       JSON.stringify({
@@ -315,6 +327,7 @@ Deno.serve(async (request) => {
         member_rows_inserted: memberRowsInserted,
         stale_running_released: releasedCountResponse.data ?? null,
         deleted_snapshots: deletedSnapshots,
+        time_online_refresh_succeeded: timeOnlineRefreshSucceeded,
       }),
       {
         status: 200,
