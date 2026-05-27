@@ -1,9 +1,14 @@
 -- ============================================================
 -- 018_add_time_online_to_level_changes.sql
--- Add time online estimate to level changes API view
+-- Add precomputed time online estimate to level changes API view
 -- ============================================================
 
-CREATE OR REPLACE VIEW public.api_historical_character_level_changes AS
+CREATE SCHEMA IF NOT EXISTS analytics;
+
+DROP VIEW IF EXISTS public.api_historical_character_level_changes;
+DROP MATERIALIZED VIEW IF EXISTS analytics.character_estimated_online_minutes;
+
+CREATE MATERIALIZED VIEW analytics.character_estimated_online_minutes AS
 WITH online_intervals AS (
     SELECT
         guild_name,
@@ -26,7 +31,7 @@ online_minutes AS (
         SUM(
             EXTRACT(
                 EPOCH FROM LEAST(
-                    COALESCE(next_snapshot_time, extracted_at_utc),
+                    next_snapshot_time,
                     extracted_at_utc + interval '15 minutes'
                 ) - extracted_at_utc
             ) / 60.0
@@ -42,6 +47,30 @@ online_minutes AS (
 )
 
 SELECT
+    guild_name,
+    world,
+    character_name,
+    COALESCE(ROUND(estimated_online_minutes), 0)::integer AS estimated_online_minutes
+FROM online_minutes;
+
+CREATE UNIQUE INDEX idx_character_estimated_online_minutes_unique
+    ON analytics.character_estimated_online_minutes (world, guild_name, character_name);
+
+CREATE INDEX idx_character_estimated_online_minutes_world_guild
+    ON analytics.character_estimated_online_minutes (world, guild_name);
+
+CREATE OR REPLACE FUNCTION public.refresh_character_estimated_online_minutes()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    REFRESH MATERIALIZED VIEW analytics.character_estimated_online_minutes;
+END;
+$$;
+
+CREATE OR REPLACE VIEW public.api_historical_character_level_changes AS
+SELECT
     level_changes.guild_name,
     level_changes.world,
     level_changes.character_name,
@@ -52,11 +81,13 @@ SELECT
     level_changes.level_gain,
     level_changes.previous_snapshot_time,
     level_changes.latest_snapshot_time,
-    COALESCE(ROUND(online_minutes.estimated_online_minutes), 0)::integer AS estimated_online_minutes
+    COALESCE(online_minutes.estimated_online_minutes, 0)::integer AS estimated_online_minutes
 FROM analytics.historical_character_level_changes level_changes
-LEFT JOIN online_minutes
+LEFT JOIN analytics.character_estimated_online_minutes online_minutes
     ON level_changes.guild_name = online_minutes.guild_name
    AND level_changes.world = online_minutes.world
    AND level_changes.character_name = online_minutes.character_name;
 
 GRANT SELECT ON public.api_historical_character_level_changes TO anon;
+GRANT SELECT ON analytics.character_estimated_online_minutes TO anon;
+GRANT EXECUTE ON FUNCTION public.refresh_character_estimated_online_minutes() TO service_role;
