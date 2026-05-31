@@ -28,6 +28,14 @@ type RefreshRequestBody = {
   batch_size?: number;
 };
 
+type FrontendAnalyticsRefreshResult = {
+  guild_name: string;
+  world: string;
+  succeeded: boolean;
+  error_message: string | null;
+  result: unknown | null;
+};
+
 const SUPABASE_URL = Deno.env.get("PROJECT_SUPABASE_URL");
 const SUPABASE_SECRET_KEY = Deno.env.get("PROJECT_SUPABASE_SECRET_KEY");
 const CRON_SECRET = Deno.env.get("GUILD_REFRESH_SECRET") || "";
@@ -167,15 +175,36 @@ async function applyRetention(): Promise<number | null> {
   return data;
 }
 
-async function refreshTimeOnlineMaterializedView(): Promise<boolean> {
-  const { error } = await supabase.rpc("refresh_character_estimated_online_minutes");
+async function refreshFrontendAnalyticsForGuild(
+  guild: ClaimedGuild,
+): Promise<FrontendAnalyticsRefreshResult> {
+  const { data, error } = await supabase.rpc("refresh_frontend_analytics_for_guild", {
+    p_world: guild.world,
+    p_guild_name: guild.guild_name,
+  });
 
   if (error) {
-    console.error("Failed to refresh time online materialized view:", error);
-    return false;
+    console.error(
+      `Failed to refresh frontend analytics for ${guild.guild_name} / ${guild.world}:`,
+      error,
+    );
+
+    return {
+      guild_name: guild.guild_name,
+      world: guild.world,
+      succeeded: false,
+      error_message: error.message,
+      result: null,
+    };
   }
 
-  return true;
+  return {
+    guild_name: guild.guild_name,
+    world: guild.world,
+    succeeded: true,
+    error_message: null,
+    result: data,
+  };
 }
 
 async function loadGuildSnapshot(guild: ClaimedGuild): Promise<number> {
@@ -286,6 +315,8 @@ Deno.serve(async (request) => {
     let failureCount = 0;
     let memberRowsInserted = 0;
 
+    const frontendRefreshResults: FrontendAnalyticsRefreshResult[] = [];
+
     console.log(`World: ${world}`);
     console.log(`Batch size: ${batchSize}`);
     console.log(`Claimed guilds: ${dueGuilds.length}`);
@@ -295,6 +326,15 @@ Deno.serve(async (request) => {
         console.log(`Refreshing ${guild.guild_name} / ${guild.world}`);
 
         const memberCount = await loadGuildSnapshot(guild);
+
+        const frontendRefreshResult = await refreshFrontendAnalyticsForGuild(guild);
+        frontendRefreshResults.push(frontendRefreshResult);
+
+        if (!frontendRefreshResult.succeeded) {
+          throw new Error(
+            `Frontend analytics refresh failed: ${frontendRefreshResult.error_message}`,
+          );
+        }
 
         await markSuccess(guild.guild_id);
 
@@ -314,7 +354,6 @@ Deno.serve(async (request) => {
     }
 
     const deletedSnapshots = await applyRetention();
-    const timeOnlineRefreshSucceeded = await refreshTimeOnlineMaterializedView();
 
     return new Response(
       JSON.stringify({
@@ -327,7 +366,13 @@ Deno.serve(async (request) => {
         member_rows_inserted: memberRowsInserted,
         stale_running_released: releasedCountResponse.data ?? null,
         deleted_snapshots: deletedSnapshots,
-        time_online_refresh_succeeded: timeOnlineRefreshSucceeded,
+        frontend_refresh_results: frontendRefreshResults,
+        frontend_refresh_success_count: frontendRefreshResults.filter((result) => {
+          return result.succeeded;
+        }).length,
+        frontend_refresh_failure_count: frontendRefreshResults.filter((result) => {
+          return !result.succeeded;
+        }).length,
       }),
       {
         status: 200,
