@@ -74,6 +74,89 @@
             </div>
         </section>
 
+        <section class="dashboard-card">
+            <div class="section-header">
+                <div>
+                    <h2>Analysis by Vocation</h2>
+                    <p>Current guild roster distribution by base vocation within the selected level range.</p>
+                </div>
+
+                <div class="date-filter">
+                    <label>
+                        Min Level
+                        <input id="vocation-min-level" type="number" min="1" placeholder="Min" />
+                    </label>
+
+                    <label>
+                        Max Level
+                        <input id="vocation-max-level" type="number" min="1" placeholder="Max" />
+                    </label>
+
+                    <button id="apply-vocation-filter" type="button">Apply</button>
+                </div>
+            </div>
+
+            <div class="vocation-analysis-grid">
+                <div class="vocation-chart-card">
+                    <canvas id="vocation-pie-chart" width="360" height="360"></canvas>
+                    <div id="vocation-chart-legend" class="vocation-chart-legend"></div>
+                </div>
+
+                <div class="vocation-table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-table="vocationAnalysis" data-sort-key="character_name">
+                                    Character
+                                </th>
+                                <th class="sortable filterable-header" data-table="vocationAnalysis" data-sort-key="base_vocation">
+                                    <span>Vocation</span>
+                                    <button
+                                        type="button"
+                                        class="column-filter-button"
+                                        data-filter-table="vocationAnalysis"
+                                        aria-label="Filter analysis by vocation"
+                                    >
+                                        🔍
+                                    </button>
+                                    <div class="column-filter-menu" id="vocation-analysis-filter-menu">
+                                        <label class="checkbox-filter-option">
+                                            <input type="checkbox" value="Monk" checked />
+                                            Monk
+                                        </label>
+                                        <label class="checkbox-filter-option">
+                                            <input type="checkbox" value="Knight" checked />
+                                            Knight
+                                        </label>
+                                        <label class="checkbox-filter-option">
+                                            <input type="checkbox" value="Paladin" checked />
+                                            Paladin
+                                        </label>
+                                        <label class="checkbox-filter-option">
+                                            <input type="checkbox" value="Druid" checked />
+                                            Druid
+                                        </label>
+                                        <label class="checkbox-filter-option">
+                                            <input type="checkbox" value="Sorcerer" checked />
+                                            Sorcerer
+                                        </label>
+                                        <button type="button" id="clear-vocation-analysis-filter">Select All</button>
+                                    </div>
+                                </th>
+                                <th class="sortable" data-table="vocationAnalysis" data-sort-key="current_level">
+                                    Level
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="vocation-analysis-table">
+                            <tr>
+                                <td colspan="3">Loading vocation analysis...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
         <section class="table-section">
             <div class="section-header">
                 <div>

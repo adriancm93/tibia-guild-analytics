@@ -43,6 +43,17 @@ const membersCharacterFilterMenuElement = document.getElementById("members-chara
 const clearLevelCharacterFilterButton = document.getElementById("clear-level-character-filter");
 const clearMembersCharacterFilterButton = document.getElementById("clear-members-character-filter");
 
+const vocationMinLevelElement = document.getElementById("vocation-min-level");
+const vocationMaxLevelElement = document.getElementById("vocation-max-level");
+const applyVocationFilterButton = document.getElementById("apply-vocation-filter");
+
+const vocationPieChartElement = document.getElementById("vocation-pie-chart");
+const vocationChartLegendElement = document.getElementById("vocation-chart-legend");
+const vocationAnalysisTableElement = document.getElementById("vocation-analysis-table");
+
+const vocationAnalysisFilterMenuElement = document.getElementById("vocation-analysis-filter-menu");
+const clearVocationAnalysisFilterButton = document.getElementById("clear-vocation-analysis-filter");
+
 let selectedWorld = "Lobera";
 let selectedGuild = "Black Clover";
 let availableGuilds = [];
@@ -54,7 +65,8 @@ const tableData = {
     joins: [],
     leaves: [],
     rank: [],
-    members: []
+    members: [],
+    vocationAnalysis: []
 };
 
 const tableSortState = {
@@ -77,8 +89,89 @@ const tableSortState = {
     members: {
         key: "current_level",
         direction: "desc"
+    },
+    vocationAnalysis: {
+        key: "current_level",
+        direction: "desc"
     }
 };
+
+const BASE_VOCATIONS = ["Monk", "Knight", "Paladin", "Druid", "Sorcerer"];
+
+function normalizeVocation(vocation) {
+    const value = String(vocation || "").toLowerCase();
+
+    if (value.includes("monk")) {
+        return "Monk";
+    }
+
+    if (value.includes("knight")) {
+        return "Knight";
+    }
+
+    if (value.includes("paladin")) {
+        return "Paladin";
+    }
+
+    if (value.includes("druid")) {
+        return "Druid";
+    }
+
+    if (value.includes("sorcerer")) {
+        return "Sorcerer";
+    }
+
+    return "Unknown";
+}
+
+function getSelectedVocationFilters() {
+    const checkedOptions = document.querySelectorAll(
+        '#vocation-analysis-filter-menu input[type="checkbox"]:checked'
+    );
+
+    return Array.from(checkedOptions).map((option) => {
+        return option.value;
+    });
+}
+
+function getVocationLevelRange() {
+    const minLevel = Number(vocationMinLevelElement?.value || 0);
+    const maxLevel = Number(vocationMaxLevelElement?.value || 0);
+
+    return {
+        minLevel: minLevel > 0 ? minLevel : null,
+        maxLevel: maxLevel > 0 ? maxLevel : null
+    };
+}
+
+function prepareVocationAnalysisRows(members) {
+    const { minLevel, maxLevel } = getVocationLevelRange();
+
+    return members
+        .map((member) => {
+            return {
+                character_name: member.character_name,
+                vocation: member.vocation,
+                base_vocation: normalizeVocation(member.vocation),
+                current_level: Number(member.current_level || 0)
+            };
+        })
+        .filter((member) => {
+            if (!BASE_VOCATIONS.includes(member.base_vocation)) {
+                return false;
+            }
+
+            if (minLevel !== null && member.current_level < minLevel) {
+                return false;
+            }
+
+            if (maxLevel !== null && member.current_level > maxLevel) {
+                return false;
+            }
+
+            return true;
+        });
+}
 
 function encodeFilterValue(value) {
     return encodeURIComponent(value);
@@ -591,7 +684,149 @@ function getFilteredTableData(tableName) {
         );
     }
 
+    if (tableName === "vocationAnalysis") {
+        const selectedVocations = getSelectedVocationFilters();
+
+        rows = rows.filter((row) => {
+            return selectedVocations.includes(row.base_vocation);
+        });
+    }
+
     return rows;
+}
+
+function getVocationCounts(rows) {
+    const counts = {};
+
+    BASE_VOCATIONS.forEach((vocation) => {
+        counts[vocation] = 0;
+    });
+
+    rows.forEach((row) => {
+        if (BASE_VOCATIONS.includes(row.base_vocation)) {
+            counts[row.base_vocation] += 1;
+        }
+    });
+
+    return counts;
+}
+
+function getVocationChartColor(index) {
+    const colors = [
+        "#22c55e",
+        "#60a5fa",
+        "#f59e0b",
+        "#a78bfa",
+        "#f87171"
+    ];
+
+    return colors[index % colors.length];
+}
+
+function renderVocationPieChart(rows) {
+    if (!vocationPieChartElement || !vocationChartLegendElement) {
+        return;
+    }
+
+    const context = vocationPieChartElement.getContext("2d");
+    const width = vocationPieChartElement.width;
+    const height = vocationPieChartElement.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 2 - 20;
+
+    context.clearRect(0, 0, width, height);
+
+    const counts = getVocationCounts(rows);
+    const entries = BASE_VOCATIONS.map((vocation, index) => {
+        return {
+            vocation,
+            count: counts[vocation],
+            color: getVocationChartColor(index)
+        };
+    });
+
+    const total = entries.reduce((sum, entry) => {
+        return sum + entry.count;
+    }, 0);
+
+    if (total === 0) {
+        context.fillStyle = "#9ca3af";
+        context.font = "18px sans-serif";
+        context.textAlign = "center";
+        context.fillText("No data", centerX, centerY);
+
+        vocationChartLegendElement.innerHTML = "";
+        return;
+    }
+
+    let startAngle = -Math.PI / 2;
+
+    entries.forEach((entry) => {
+        if (entry.count === 0) {
+            return;
+        }
+
+        const sliceAngle = (entry.count / total) * Math.PI * 2;
+        const endAngle = startAngle + sliceAngle;
+
+        context.beginPath();
+        context.moveTo(centerX, centerY);
+        context.arc(centerX, centerY, radius, startAngle, endAngle);
+        context.closePath();
+        context.fillStyle = entry.color;
+        context.fill();
+
+        startAngle = endAngle;
+    });
+
+    vocationChartLegendElement.innerHTML = entries
+        .map((entry) => {
+            const percentage = total > 0
+                ? Math.round((entry.count / total) * 100)
+                : 0;
+
+            return `
+                <div class="vocation-legend-item">
+                    <div class="vocation-legend-left">
+                        <span
+                            class="vocation-legend-swatch"
+                            style="background: ${entry.color};"
+                        ></span>
+                        <span>${entry.vocation}</span>
+                    </div>
+                    <strong>${entry.count} (${percentage}%)</strong>
+                </div>
+            `;
+        })
+        .join("");
+}
+
+function renderVocationAnalysisTable(rows) {
+    if (!vocationAnalysisTableElement) {
+        return;
+    }
+
+    if (!rows.length) {
+        vocationAnalysisTableElement.innerHTML = `
+            <tr>
+                <td colspan="3">No characters found for the selected level/vocation filters.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    vocationAnalysisTableElement.innerHTML = rows
+        .map((row) => {
+            return `
+                <tr>
+                    <td>${row.character_name}</td>
+                    <td>${row.base_vocation}</td>
+                    <td>${row.current_level}</td>
+                </tr>
+            `;
+        })
+        .join("");
 }
 
 function getSortedTableData(tableName) {
@@ -652,21 +887,42 @@ function renderSortedTable(tableName) {
         renderRankChangesTable(sortedData);
     } else if (tableName === "members") {
         renderGuildMembersTable(sortedData);
+    } else if (tableName === "vocationAnalysis") {
+    renderVocationAnalysisTable(sortedData);
+    renderVocationPieChart(sortedData);
     }
 
     updateSortHeaderStyles();
 }
 
+async function loadVocationAnalysis() {
+    const members = await fetchGuildMembers();
+
+    tableData.vocationAnalysis = prepareVocationAnalysisRows(members);
+
+    renderSortedTable("vocationAnalysis");
+}
+
 function closeAllColumnFilterMenus() {
     levelCharacterFilterMenuElement?.classList.remove("open");
     membersCharacterFilterMenuElement?.classList.remove("open");
+    vocationAnalysisFilterMenuElement?.classList.remove("open");
 }
 
 function toggleColumnFilterMenu(tableName) {
-    const targetMenu =
-        tableName === "level"
-            ? levelCharacterFilterMenuElement
-            : membersCharacterFilterMenuElement;
+    let targetMenu = null;
+
+    if (tableName === "level") {
+        targetMenu = levelCharacterFilterMenuElement;
+    }
+
+    if (tableName === "members") {
+        targetMenu = membersCharacterFilterMenuElement;
+    }
+
+    if (tableName === "vocationAnalysis") {
+        targetMenu = vocationAnalysisFilterMenuElement;
+    }
 
     const isOpen = targetMenu?.classList.contains("open");
 
@@ -985,6 +1241,7 @@ async function loadDashboard() {
         await loadLevelChanges();
         await loadGuildMovementTables();
         await loadGuildMembers();
+        await loadVocationAnalysis();
     } catch (error) {
         console.error(error);
 
@@ -1042,7 +1299,39 @@ applyJoinsFilterButton.addEventListener("click", loadGuildJoins);
 applyLeavesFilterButton.addEventListener("click", loadGuildLeaves);
 applyRankFilterButton.addEventListener("click", loadRankChanges);
 applyGuildSelectionButton.addEventListener("click", applySelectedGuild);
+applyVocationFilterButton?.addEventListener("click", loadVocationAnalysis);
 
+vocationMinLevelElement?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        loadVocationAnalysis();
+    }
+});
+
+vocationMaxLevelElement?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        loadVocationAnalysis();
+    }
+});
+
+document
+    .querySelectorAll('#vocation-analysis-filter-menu input[type="checkbox"]')
+    .forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+            renderSortedTable("vocationAnalysis");
+        });
+    });
+
+clearVocationAnalysisFilterButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    document
+        .querySelectorAll('#vocation-analysis-filter-menu input[type="checkbox"]')
+        .forEach((checkbox) => {
+            checkbox.checked = true;
+        });
+
+    renderSortedTable("vocationAnalysis");
+});
 
 loadGuildSelectors()
     .then(() => initializeDateBounds())
