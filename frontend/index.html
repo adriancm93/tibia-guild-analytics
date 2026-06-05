@@ -74,7 +74,34 @@
             </div>
         </section>
 
-        <section class="dashboard-card">
+
+        <nav class="dashboard-tabs" aria-label="Dashboard sections">
+            <button class="dashboard-tab active" type="button" data-tab-target="analysis-vocation-section">
+                Analysis by Vocation
+            </button>
+
+            <button class="dashboard-tab" type="button" data-tab-target="level-changes-section">
+                Level Changes and Time Online
+            </button>
+
+            <button class="dashboard-tab" type="button" data-tab-target="guild-movement-section">
+                Guild Joins / Leaves
+            </button>
+
+            <button class="dashboard-tab" type="button" data-tab-target="rank-changes-section">
+                Rank Changes
+            </button>
+
+            <button class="dashboard-tab" type="button" data-tab-target="guild-members-section">
+                Guild Members
+            </button>
+        </nav>
+
+
+
+
+
+        <section id="analysis-vocation-section" class="dashboard-card dashboard-tab-section active">
             <div class="section-header">
                 <div>
                     <h2>Analysis by Vocation</h2>
@@ -157,7 +184,8 @@
                 </div>
             </div>
         </section>
-        <section class="table-section">
+
+        <section id="level-changes-section" class="dashboard-card dashboard-tab-section">
             <div class="section-header">
                 <div>
                     <h2>Level Changes and Time Online</h2>
@@ -216,87 +244,88 @@
             </div>
         </section>
 
-        <section class="table-section">
-            <div class="section-header">
-                <div>
-                    <h2>Guild Joins</h2>
-                    <p>Characters who joined within the selected snapshot date range.</p>
+        <div id="guild-movement-section" class="dashboard-tab-section">
+            <section class="table-section">
+                <div class="section-header">
+                    <div>
+                        <h2>Guild Joins</h2>
+                        <p>Characters who joined within the selected snapshot date range.</p>
+                    </div>
+
+                    <div class="date-filter">
+                        <label>
+                            From
+                            <input type="date" id="joins-start-date" />
+                        </label>
+                        <label>
+                            To
+                            <input type="date" id="joins-end-date" />
+                        </label>
+                        <button id="apply-joins-filter">Apply</button>
+                    </div>
                 </div>
 
-                <div class="date-filter">
-                    <label>
-                        From
-                        <input type="date" id="joins-start-date" />
-                    </label>
-                    <label>
-                        To
-                        <input type="date" id="joins-end-date" />
-                    </label>
-                    <button id="apply-joins-filter">Apply</button>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-table="joins" data-sort-key="character_name">Character</th>
+                                <th class="sortable" data-table="joins" data-sort-key="vocation">Vocation</th>
+                                <th class="sortable" data-table="joins" data-sort-key="level">Level</th>
+                                <th class="sortable" data-table="joins" data-sort-key="guild_rank">Guild Rank</th>
+                                <th class="sortable" data-table="joins" data-sort-key="latest_snapshot_time">Join Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guild-joins-table">
+                            <tr>
+                                <td colspan="5">Loading guild joins...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            </section>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-table="joins" data-sort-key="character_name">Character</th>
-                            <th class="sortable" data-table="joins" data-sort-key="vocation">Vocation</th>
-                            <th class="sortable" data-table="joins" data-sort-key="level">Level</th>
-                            <th class="sortable" data-table="joins" data-sort-key="guild_rank">Guild Rank</th>
-                            <th class="sortable" data-table="joins" data-sort-key="latest_snapshot_time">Join Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="guild-joins-table">
-                        <tr>
-                            <td colspan="5">Loading guild joins...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            <section class="table-section">
+                <div class="section-header">
+                    <div>
+                        <h2>Guild Leaves</h2>
+                        <p>Characters who left within the selected snapshot date range.</p>
+                    </div>
 
-        <section class="table-section">
-            <div class="section-header">
-                <div>
-                    <h2>Guild Leaves</h2>
-                    <p>Characters who left within the selected snapshot date range.</p>
+                    <div class="date-filter">
+                        <label>
+                            From
+                            <input type="date" id="leaves-start-date" />
+                        </label>
+                        <label>
+                            To
+                            <input type="date" id="leaves-end-date" />
+                        </label>
+                        <button id="apply-leaves-filter">Apply</button>
+                    </div>
                 </div>
 
-                <div class="date-filter">
-                    <label>
-                        From
-                        <input type="date" id="leaves-start-date" />
-                    </label>
-                    <label>
-                        To
-                        <input type="date" id="leaves-end-date" />
-                    </label>
-                    <button id="apply-leaves-filter">Apply</button>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-table="leaves" data-sort-key="character_name">Character</th>
+                                <th class="sortable" data-table="leaves" data-sort-key="vocation">Vocation</th>
+                                <th class="sortable" data-table="leaves" data-sort-key="level">Level</th>
+                                <th class="sortable" data-table="leaves" data-sort-key="guild_rank">Guild Rank</th>
+                                <th class="sortable" data-table="leaves" data-sort-key="latest_snapshot_time">Leave Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guild-leaves-table">
+                            <tr>
+                                <td colspan="5">Loading guild leaves...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-table="leaves" data-sort-key="character_name">Character</th>
-                            <th class="sortable" data-table="leaves" data-sort-key="vocation">Vocation</th>
-                            <th class="sortable" data-table="leaves" data-sort-key="level">Level</th>
-                            <th class="sortable" data-table="leaves" data-sort-key="guild_rank">Guild Rank</th>
-                            <th class="sortable" data-table="leaves" data-sort-key="latest_snapshot_time">Leave Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="guild-leaves-table">
-                        <tr>
-                            <td colspan="5">Loading guild leaves...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="table-section">
+            </section>
+        </div>
+       <section id="rank-changes-section" class="dashboard-card dashboard-tab-section">
             <div class="section-header">
                 <div>
                     <h2>Rank Changes</h2>
@@ -335,7 +364,7 @@
             </div>
         </section>
 
-        <section class="table-section">
+        <section id="guild-members-section" class="dashboard-card dashboard-tab-section">
             <div class="section-header">
                 <div>
                     <h2>Guild Members</h2>

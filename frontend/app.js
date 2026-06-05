@@ -54,6 +54,9 @@ const vocationAnalysisTableElement = document.getElementById("vocation-analysis-
 const vocationAnalysisFilterMenuElement = document.getElementById("vocation-analysis-filter-menu");
 const clearVocationAnalysisFilterButton = document.getElementById("clear-vocation-analysis-filter");
 
+const dashboardTabButtons = document.querySelectorAll(".dashboard-tab");
+const dashboardTabSections = document.querySelectorAll(".dashboard-tab-section");
+
 let selectedWorld = "Lobera";
 let selectedGuild = "Black Clover";
 let availableGuilds = [];
@@ -1162,6 +1165,18 @@ function renderGuildOptions() {
         .join("");
 }
 
+function activateDashboardTab(targetSectionId) {
+    dashboardTabButtons.forEach((button) => {
+        const isActive = button.dataset.tabTarget === targetSectionId;
+        button.classList.toggle("active", isActive);
+    });
+
+    dashboardTabSections.forEach((section) => {
+        const isActive = section.id === targetSectionId;
+        section.classList.toggle("active", isActive);
+    });
+}
+
 async function loadGuildSelectors() {
     const [worlds, guilds] = await Promise.all([
         fetchWorlds(),
@@ -1331,6 +1346,12 @@ clearVocationAnalysisFilterButton?.addEventListener("click", (event) => {
         });
 
     renderSortedTable("vocationAnalysis");
+});
+
+dashboardTabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        activateDashboardTab(button.dataset.tabTarget);
+    });
 });
 
 loadGuildSelectors()

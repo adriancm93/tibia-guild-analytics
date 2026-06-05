@@ -531,3 +531,50 @@ td {
         grid-template-columns: 1fr;
     }
 }
+
+.dashboard-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 28px auto 22px;
+    max-width: 1200px;
+    padding: 0 16px;
+}
+
+.dashboard-tab {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--muted);
+    padding: 10px 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.dashboard-tab:hover {
+    border-color: var(--accent);
+    color: var(--text);
+}
+
+.dashboard-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #04120a;
+}
+
+.dashboard-tab-section {
+    display: none;
+}
+
+.dashboard-tab-section.active {
+    display: block;
+}
+
+#guild-movement-section.active {
+    display: block;
+}
+
+#guild-movement-section .dashboard-card + .dashboard-card {
+    margin-top: 24px;
+}
