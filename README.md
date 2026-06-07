@@ -34,7 +34,7 @@ Current functionality includes:
 - Character search and table sorting
 - Date filters by analytics section
 - World and guild selectors
-- Automated scheduled ingestion
+- Automated ingestion through Supabase Cron and Supabase Edge Functions
 - Per-guild analytics cache refresh for fast dashboard queries
 
 The current production scope is focused on the Lobera world, with all Lobera guilds available through the website selector.
