@@ -4,4 +4,4 @@ This folder contains one-time cleanup scripts used to remove legacy database obj
 
 These scripts are not part of normal database initialization.
 
-Use carefully and avoid `CASCADE` unless dependencies have been reviewed.
+Use carefully. Prefer explicit drops and avoid `CASCADE` unless dependencies have been reviewed.

@@ -1,171 +1,251 @@
 # Tibia Guild Analytics
 
-A production-style data engineering project that collects Tibia guild data, stores historical snapshots in PostgreSQL, models guild activity with SQL analytics views, refreshes the data automatically, and serves a public dashboard through a static frontend website.
+Tibia Guild Analytics is a production-style data engineering project that tracks Tibia guild activity over time and serves a public analytics dashboard.
+
+The platform ingests guild roster snapshots from the TibiaData API, stores raw and parsed historical data in Supabase Postgres, computes per-guild analytics caches, exposes curated public API views through Supabase REST, and serves a static frontend through Cloudflare Pages.
 
 Live site:
-
-```text
-https://tibia-guild-analytics.pages.dev/
-```
-
-Custom domain:
 
 ```text
 https://tibiaguildanalytics.com/
 ```
 
-> The custom domain may take time to fully propagate after registration.
+Cloudflare Pages preview:
+
+```text
+https://tibia-guild-analytics.pages.dev/
+```
 
 ---
 
 ## Project Overview
 
-This project tracks guild activity over time for a Tibia guild. It extracts guild member data on a recurring schedule, stores both raw and parsed historical snapshots, and exposes analytics for level progression, guild joins, guild leaves, rank changes, and guild-level summary metrics.
+The project tracks guild-level and character-level activity for Tibia guilds.
 
-The project is designed to demonstrate an end-to-end data engineering workflow:
+Current functionality includes:
 
-```text
-Data extraction
-        ↓
-Raw snapshot storage
-        ↓
-Parsed relational tables
-        ↓
-SQL staging and analytics views
-        ↓
-Automated scheduled refresh
-        ↓
-Public frontend dashboard
-```
+- Guild overview metrics
+- Analysis by vocation
+- Level changes and estimated time online
+- Guild joins
+- Guild leaves
+- Rank changes
+- Latest guild roster
+- Character search and table sorting
+- Date filters by analytics section
+- World and guild selectors
+- Automated scheduled ingestion
+- Per-guild analytics cache refresh for fast dashboard queries
+
+The current production scope is focused on the Lobera world, with all Lobera guilds available through the website selector.
 
 ---
 
 ## Current Production Architecture
 
-The low-cost production deployment uses:
+The current production architecture is serverless and low-cost.
 
 ```text
-GitHub Actions
+TibiaData API
         ↓
-Python ingestion pipeline
+Supabase Cron
         ↓
-Supabase Postgres
+Supabase Edge Function
         ↓
-Supabase REST API
+Supabase Postgres raw snapshot tables
         ↓
-Cloudflare Pages frontend
+Per-guild analytics cache tables
+        ↓
+Public Supabase REST API views
+        ↓
+Cloudflare Pages static frontend
 ```
 
 ### Production Components
 
 | Layer | Technology |
 |---|---|
-| Data source | TibiaData API |
-| Ingestion | Python |
+| Source API | TibiaData API |
+| Scheduler | Supabase Cron |
+| Ingestion worker | Supabase Edge Function |
 | Database | Supabase Postgres |
-| Transformations | SQL views |
-| Scheduled refresh | GitHub Actions |
-| Frontend | HTML, CSS, JavaScript |
+| Raw storage | `public.raw_guild_snapshot` |
+| Parsed history | `public.guild_member_snapshot` |
+| Metadata / queue | `public.tibia_world`, `public.tibia_guild` |
+| Analytics serving layer | `analytics.*_cache` tables |
+| API layer | Public Supabase REST views |
+| Frontend | Static HTML, CSS, JavaScript |
 | Hosting | Cloudflare Pages |
-| API access | Supabase REST API |
+| DNS / custom domain | Cloudflare |
 
-The production website does **not** require an always-running backend server. The frontend reads from curated public API views exposed through Supabase REST.
+The production website does not require an always-running backend server. The frontend reads from curated Supabase REST API views.
+
+---
+
+## Data Flow
+
+### 1. Scheduled refresh
+
+Supabase Cron triggers the `refresh-guilds` Edge Function on a recurring cadence.
+
+### 2. Guild queue claim
+
+The Edge Function claims due guilds from `public.tibia_guild` using queue-control RPC functions.
+
+### 3. API extraction
+
+For each claimed guild, the Edge Function calls the TibiaData API and retrieves the latest guild roster.
+
+### 4. Raw snapshot storage
+
+The full API payload is stored in:
+
+```text
+public.raw_guild_snapshot
+```
+
+### 5. Parsed member snapshot storage
+
+Each guild member is parsed into one row per character per snapshot and stored in:
+
+```text
+public.guild_member_snapshot
+```
+
+### 6. Per-guild analytics cache refresh
+
+After a guild is successfully ingested, the Edge Function calls:
+
+```text
+public.refresh_frontend_analytics_for_guild(world, guild_name)
+```
+
+That function rebuilds only that guild’s frontend analytics cache rows.
+
+### 7. Public API views
+
+The frontend reads from public views in the `public` schema. These views sit on top of precomputed cache tables and are optimized for dashboard queries.
+
+---
+
+## Current Database Model
+
+### Core source tables
+
+| Object | Purpose |
+|---|---|
+| `public.raw_guild_snapshot` | Stores raw TibiaData guild API responses |
+| `public.guild_member_snapshot` | Stores parsed member rows per snapshot |
+| `public.tibia_world` | Stores world metadata |
+| `public.tibia_guild` | Stores guild metadata, refresh status, and queue timestamps |
+
+### Analytics cache tables
+
+| Object | Purpose |
+|---|---|
+| `analytics.snapshot_pairs_api_cache` | Consecutive snapshot pairs per guild |
+| `analytics.character_estimated_online_minutes_cache` | Estimated online minutes per character |
+| `analytics.character_level_changes_with_online_cache` | Level changes enriched with time-online metrics |
+| `analytics.guild_joins_api_cache` | Guild join events |
+| `analytics.guild_leaves_api_cache` | Guild leave events |
+| `analytics.rank_changes_api_cache` | Rank change events |
+| `analytics.latest_guild_members_api_cache` | Latest roster with last-connected estimate |
+
+### Public API views used by the frontend
+
+| View | Purpose |
+|---|---|
+| `public.api_worlds` | World selector |
+| `public.api_guilds` | Guild selector |
+| `public.api_snapshot_date_bounds_by_guild` | Date filter bounds |
+| `public.api_guild_overview_by_snapshot` | Guild overview metrics by snapshot |
+| `public.api_historical_character_level_changes` | Level changes and time online |
+| `public.api_historical_guild_joins` | Guild joins |
+| `public.api_historical_guild_leaves` | Guild leaves |
+| `public.api_historical_rank_changes` | Rank changes |
+| `public.api_latest_guild_members` | Latest guild roster |
+
+### RPC functions used by the Edge Function
+
+| Function | Purpose |
+|---|---|
+| `public.claim_due_guild_refresh_batch` | Claims due guilds for refresh |
+| `public.mark_guild_refresh_success` | Marks a guild refresh as successful |
+| `public.mark_guild_refresh_failure` | Marks a guild refresh as failed |
+| `public.release_stale_running_guild_refreshes` | Releases stale running guild claims |
+| `public.apply_snapshot_retention` | Deletes snapshots outside the retention window |
+| `public.refresh_frontend_analytics_for_guild` | Rebuilds frontend cache rows for one guild |
 
 ---
 
 ## Dashboard Features
 
-The dashboard currently includes:
+The dashboard is organized into tabs below the guild overview section.
 
-- Guild overview metrics
-- Latest refresh timestamp
-- Number of members
-- Maximum member level
-- Minimum member level
-- Average member level
-- Historical character level changes
-- Guild joins
-- Guild leaves
-- Rank changes
-- Independent date filters for each analytics section
-- Sortable analytics tables
+### Guild Overview
 
----
+Displays current summary metrics for the selected world and guild:
 
-## Automated Refresh
+- Latest refresh age
+- Member count
+- Maximum level
+- Minimum level
+- Average level
 
-The production pipeline runs through GitHub Actions on a scheduled workflow.
+### Analysis by Vocation
 
-Current cadence:
+Shows a vocation distribution chart and roster table for the selected guild.
 
-```text
-Every 15 minutes
-```
+Features:
 
-The workflow:
+- Level range filter
+- Base vocation normalization
+- Multi-select vocation filter
+- Sortable character table
 
-1. Checks out the repository.
-2. Sets up Python.
-3. Installs ingestion dependencies.
-4. Extracts the latest guild data.
-5. Loads the snapshot into Supabase Postgres.
+Promoted and non-promoted vocations are grouped into base vocations:
 
-Workflow file:
-
-```text
-.github/workflows/scheduled_ingestion.yml
-```
-
----
-
-## Data Model
-
-The database stores both raw snapshots and parsed member-level history.
-
-### Core Tables
-
-```text
-raw_guild_snapshot
-guild_member_snapshot
-```
-
-### Main Concepts
-
-| Object | Purpose |
+| Source vocations | Base vocation |
 |---|---|
-| `raw_guild_snapshot` | Stores one raw guild snapshot per extraction run |
-| `guild_member_snapshot` | Stores one row per guild member per snapshot |
-| Staging views | Standardize raw/parsed fields for downstream analytics |
-| Analytics views | Compare snapshots and calculate guild activity |
-| Public API views | Expose curated read-only data to the frontend |
+| Monk variants | Monk |
+| Knight / Elite Knight | Knight |
+| Paladin / Royal Paladin | Paladin |
+| Druid / Elder Druid | Druid |
+| Sorcerer / Master Sorcerer | Sorcerer |
 
----
+### Level Changes and Time Online
 
-## Analytics Views
+Shows character level changes within a selected date range.
 
-The analytics layer supports both latest-snapshot comparisons and historical date-range analysis.
+Includes:
 
-Examples:
+- Character
+- Vocation
+- Guild rank
+- Previous level
+- Current level
+- Level gain
+- Estimated time online
 
-```text
-analytics.historical_character_level_changes
-analytics.historical_guild_joins
-analytics.historical_guild_leaves
-analytics.historical_rank_changes
-```
+### Guild Joins / Leaves
 
-Public API-facing views are exposed from the `public` schema for Supabase REST access.
+Shows detected guild join and leave events based on consecutive roster snapshots.
 
-Examples:
+### Rank Changes
 
-```text
-public.api_guild_overview_by_snapshot
-public.api_historical_character_level_changes
-public.api_historical_guild_joins
-public.api_historical_guild_leaves
-public.api_historical_rank_changes
-public.api_snapshot_date_bounds
-```
+Shows detected rank changes and the date the change was observed.
+
+### Guild Members
+
+Shows the latest roster for the selected guild.
+
+Includes:
+
+- Character
+- Vocation
+- Guild rank
+- Current level
+- Last connected estimate
 
 ---
 
@@ -175,149 +255,82 @@ public.api_snapshot_date_bounds
 tibia-guild-analytics/
 ├── .github/
 │   └── workflows/
-│       └── scheduled_ingestion.yml
-├── backend/
-│   └── app/
+├── archive/
+│   ├── legacy_backend/
+│   └── legacy_orchestration/
+├── data/
 ├── database/
+│   ├── archive/
+│   ├── cleanup/
 │   ├── init/
 │   └── validation/
 ├── docs/
 ├── frontend/
 ├── ingestion/
 │   └── src/
-├── orchestration/
+├── supabase/
+│   └── functions/
+│       └── refresh-guilds/
 ├── docker-compose.yml
 └── README.md
 ```
 
-### Main Folders
+### Main folders
 
 | Folder | Purpose |
 |---|---|
-| `.github/workflows` | Scheduled production ingestion workflow |
-| `database/init` | SQL schema, staging views, analytics views, and public API views |
-| `database/validation` | SQL validation checks |
-| `frontend` | Static production website |
-| `ingestion/src` | Python extraction and loading scripts |
-| `orchestration` | Local pipeline runner |
-| `backend` | Optional local FastAPI API layer used during development |
-| `docs` | Architecture and operational documentation |
+| `.github/workflows` | Manual fallback workflows |
+| `archive` | Legacy application components preserved for reference |
+| `data` | Local/generated raw data area |
+| `database/init` | Current database build scripts |
+| `database/archive` | Historical SQL scripts from earlier project phases |
+| `database/cleanup` | One-time database cleanup scripts |
+| `database/validation` | Validation SQL queries |
+| `docs` | Architecture notes and learning documentation |
+| `frontend` | Current production static dashboard |
+| `ingestion` | Local/manual Python utilities for extraction and metadata discovery |
+| `supabase/functions` | Production Supabase Edge Functions |
 
 ---
 
-## Local Development
+## Local Frontend Development
 
-### 1. Clone the repository
+The frontend is a static HTML/CSS/JavaScript application.
 
-```bash
-git clone https://github.com/adriancm93/tibia-guild-analytics.git
-cd tibia-guild-analytics
-```
-
-### 2. Create local environment files
-
-Create a local `.env` file from the example:
+From the project root:
 
 ```bash
-cp .env.example .env
+cd frontend
+python3 -m http.server 3000
 ```
 
-Example variables:
+Open:
 
-```env
-TIBIA_GUILD_NAME="Black Clover"
-TIBIA_WORLD=Lobera
-RAW_DATA_DIR=data/raw
+```text
+http://127.0.0.1:3000
+```
 
-POSTGRES_HOST=localhost
+The frontend uses `frontend/config.js` for Supabase configuration.
+
+Do not commit real secrets. The browser should only use the Supabase anon/public key, never the Supabase secret key.
+
+---
+
+## Supabase Environment
+
+For local administrative SQL work, create a local `.env.supabase` file.
+
+Example:
+
+```bash
+POSTGRES_HOST=<supabase-db-host>
 POSTGRES_PORT=5432
-POSTGRES_DB=tibia_analytics
-POSTGRES_USER=tibia_user
-POSTGRES_PASSWORD=tibia_password
-```
-
-Do not commit real environment files.
-
----
-
-## Run the Local Docker Stack
-
-The repository includes a local Docker Compose stack for development.
-
-```bash
-docker compose up --build
-```
-
-Local services:
-
-```text
-Frontend: http://localhost:3000
-Backend:  http://localhost:8000/docs
-Postgres: localhost:5432
-```
-
-The local Docker stack is useful for development and testing. The production deployment uses Supabase and Cloudflare Pages.
-
----
-
-## Run the Ingestion Pipeline Locally
-
-Create and activate the ingestion virtual environment:
-
-```bash
-python3 -m venv ingestion/.venv
-source ingestion/.venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r ingestion/requirements.txt
-```
-
-Run extraction:
-
-```bash
-python ingestion/src/main.py
-```
-
-Load the latest snapshot:
-
-```bash
-python ingestion/src/load_postgres.py
-```
-
-Run the local orchestration script:
-
-```bash
-python orchestration/run_pipeline.py
-```
-
----
-
-## Supabase Production Connection
-
-Production data is stored in Supabase Postgres.
-
-For local testing against Supabase, create a local file named:
-
-```text
-.env.supabase
-```
-
-Do not commit this file.
-
-Example format:
-
-```env
-TIBIA_GUILD_NAME="Black Clover"
-TIBIA_WORLD=Lobera
-RAW_DATA_DIR=data/raw
-
-POSTGRES_HOST=<supabase-host>
-POSTGRES_PORT=<supabase-port>
 POSTGRES_DB=postgres
-POSTGRES_USER=<supabase-user>
-POSTGRES_PASSWORD=<supabase-password>
+POSTGRES_USER=<supabase-db-user>
+POSTGRES_PASSWORD=<supabase-db-password>
 ```
 
-To export these variables in the terminal:
+Load it in a terminal:
 
 ```bash
 set -a
@@ -325,70 +338,98 @@ source .env.supabase
 set +a
 ```
 
+Do not commit `.env`, `.env.supabase`, or any secret-bearing file.
+
 ---
 
-## Deployment
+## Supabase Edge Function
 
-### Production Deployment
-
-| Component | Deployment |
-|---|---|
-| Database | Supabase Postgres |
-| Scheduled refresh | GitHub Actions |
-| Frontend | Cloudflare Pages |
-| Custom domain | Cloudflare DNS / Registrar |
-
-### Frontend Hosting
-
-The frontend is deployed from:
+The production ingestion worker is:
 
 ```text
-frontend/
+supabase/functions/refresh-guilds/index.ts
 ```
 
-Cloudflare Pages serves the static site and automatically redeploys after pushes to the main branch.
+It is responsible for:
 
-### Database Refresh
+1. Authenticating scheduled requests with `x-cron-secret`.
+2. Claiming due guilds.
+3. Fetching guild data from TibiaData.
+4. Inserting raw and parsed snapshots.
+5. Refreshing per-guild frontend analytics cache tables.
+6. Updating refresh status.
+7. Applying retention.
 
-GitHub Actions runs the ingestion workflow on a schedule and loads new snapshots into Supabase.
-
----
-
-## Optional Local FastAPI Backend
-
-The repository includes a FastAPI backend used during local development and earlier architecture exploration.
-
-The production deployment currently uses Supabase REST API directly to minimize hosting cost and avoid an always-running backend service.
-
-Run locally:
+Deploy:
 
 ```bash
-source backend/.venv/bin/activate
-uvicorn app.main:app --reload --app-dir backend
+supabase functions deploy refresh-guilds --no-verify-jwt
 ```
 
-API docs:
+Manual test:
 
-```text
-http://127.0.0.1:8000/docs
+```bash
+curl -i \
+  -X POST "https://<project-ref>.supabase.co/functions/v1/refresh-guilds" \
+  -H "Content-Type: application/json" \
+  -H "x-cron-secret: <secret>" \
+  -d '{"world":"Lobera","batch_size":5}'
 ```
 
 ---
 
-## Validation
+## Database Initialization
 
-Database validation scripts are stored in:
+Current active SQL scripts live in:
+
+```text
+database/init/
+```
+
+These scripts represent the current schema and serving architecture.
+
+Legacy SQL scripts are kept in:
+
+```text
+database/archive/
+```
+
+One-time cleanup scripts are kept in:
+
+```text
+database/cleanup/
+```
+
+Validation scripts are kept in:
 
 ```text
 database/validation/
 ```
 
-Example validation checks include:
+---
 
-- Snapshot counts
-- Parsed member counts
-- Latest snapshot comparison checks
-- Historical analytics checks
+## Local Docker
+
+The repository includes a Docker Compose file for local Postgres development.
+
+```bash
+docker compose up -d
+```
+
+Production does not depend on the local Docker stack. Production uses Supabase Postgres.
+
+---
+
+## Manual / Legacy Components
+
+The `archive/` folder contains earlier architecture components that are no longer part of production.
+
+Examples:
+
+- `archive/legacy_backend`: earlier FastAPI backend
+- `archive/legacy_orchestration`: earlier local pipeline runner
+
+These are preserved for learning context but are not used by the current production deployment.
 
 ---
 
@@ -396,30 +437,32 @@ Example validation checks include:
 
 This project demonstrates:
 
-- Python data ingestion from an external API
+- External API ingestion
 - Raw and parsed data storage design
+- Snapshot-based historical tracking
+- Queue-based refresh orchestration
+- Supabase Edge Function ingestion
+- Supabase Cron scheduling
 - PostgreSQL relational modeling
-- SQL staging and analytics views
-- Historical snapshot comparison logic
-- Scheduled cloud-based data refresh
-- Supabase-hosted production database
-- Public REST API exposure through curated database views
-- Static frontend deployment through Cloudflare Pages
-- Environment variable and secret management
-- Local Docker-based development workflow
+- Incremental per-guild analytics cache refresh
+- Public API view design
+- Static frontend deployment
+- Cloudflare Pages hosting
+- Secret management
+- Retention policy design
+- Performance optimization through precomputed cache tables
 
 ---
 
 ## Future Improvements
 
-Planned or potential enhancements:
+Potential next enhancements:
 
-- Add guild and world selector filters
-- Support multiple guilds and worlds
-- Add charts for level progression and member trends
-- Add richer historical summary metrics
-- Improve frontend UX and mobile layout
-- Add automated SQL validation to GitHub Actions
-- Add monitoring for failed ingestion runs
-- Add project architecture diagram
-- Add screenshots to documentation
+- Add more worlds beyond Lobera
+- Add trend charts for member count and average level
+- Add historical vocation distribution over time
+- Add cache freshness monitoring
+- Add automated database validation in CI
+- Add screenshots and architecture diagrams
+- Add error alerting for failed guild refreshes
+- Add incremental cache refresh metrics

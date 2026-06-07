@@ -1,29 +1,93 @@
-# Frontend Website
+# Frontend
 
-Static HTML, CSS, and JavaScript frontend for the Tibia Guild Analytics project.
+This folder contains the current production frontend for Tibia Guild Analytics.
 
-The frontend calls the FastAPI backend and displays guild snapshot analytics in the browser.
+The frontend is a static HTML, CSS, and JavaScript dashboard deployed through Cloudflare Pages. It reads directly from Supabase REST API views and does not require a FastAPI backend in production.
 
-## Local Setup
+---
 
-Before running the frontend, make sure the backend API is running.
-
-From the project root:
-
-```bash
-source backend/.venv/bin/activate
-uvicorn app.main:app --reload --app-dir backend
-```
-
-The backend should be available at:
+## Architecture
 
 ```text
-http://127.0.0.1:8000
+Cloudflare Pages
+        ↓
+Static HTML/CSS/JavaScript
+        ↓
+Supabase REST API
+        ↓
+Public API views
+        ↓
+Per-guild analytics cache tables
 ```
 
-## Run the Frontend
+The frontend is intentionally lightweight. Data transformation and performance optimization happen in PostgreSQL through cache tables and curated public API views.
 
-Open a second terminal.
+---
+
+## Main Files
+
+| File | Purpose |
+|---|---|
+| `index.html` | Dashboard layout and sections |
+| `styles.css` | Application styling |
+| `app.js` | Data fetching, filtering, sorting, and rendering logic |
+| `config.js` | Runtime configuration for Supabase access |
+| `Dockerfile` | Optional local/containerized frontend serving |
+
+---
+
+## Data Source
+
+The frontend uses Supabase REST when configured with:
+
+```javascript
+window.APP_CONFIG = {
+    DATA_SOURCE: "supabase",
+    SUPABASE_URL: "<supabase-url>",
+    SUPABASE_ANON_KEY: "<supabase-anon-key>"
+};
+```
+
+Only the Supabase anon/public key should be used in the browser.
+
+Never expose the Supabase secret key in frontend code.
+
+---
+
+## Public API Views Used
+
+The frontend reads from these Supabase views:
+
+| View | Purpose |
+|---|---|
+| `api_worlds` | World selector |
+| `api_guilds` | Guild selector |
+| `api_snapshot_date_bounds_by_guild` | Date filter bounds |
+| `api_guild_overview_by_snapshot` | Guild overview metrics |
+| `api_historical_character_level_changes` | Level changes and time online |
+| `api_historical_guild_joins` | Guild joins |
+| `api_historical_guild_leaves` | Guild leaves |
+| `api_historical_rank_changes` | Rank changes |
+| `api_latest_guild_members` | Latest guild roster and last-connected estimate |
+
+---
+
+## Dashboard Sections
+
+The dashboard includes:
+
+- Guild Overview
+- Analysis by Vocation
+- Level Changes and Time Online
+- Guild Joins / Leaves
+- Rank Changes
+- Guild Members
+
+The Guild Overview remains visible at the top. The analytical sections are organized into tabs for easier navigation.
+
+---
+
+## Local Development
 
 From the project root:
 
@@ -32,43 +96,40 @@ cd frontend
 python3 -m http.server 3000
 ```
 
-Then open:
+Open:
 
 ```text
-http://localhost:3000
+http://127.0.0.1:3000
 ```
 
-## API Dependency
-
-The frontend currently expects the API to be running at:
+Hard refresh after JavaScript or CSS changes:
 
 ```text
-http://127.0.0.1:8000
+Cmd + Shift + R
 ```
 
-This is configured in:
+---
 
-```text
-frontend/app.js
-```
+## Configuration Notes
+
+For local development, `config.js` should point to the appropriate Supabase project and use the anon/public key.
+
+Example:
 
 ```javascript
-const API_BASE_URL = "http://127.0.0.1:8000";
+window.APP_CONFIG = {
+    DATA_SOURCE: "supabase",
+    SUPABASE_URL: "https://<project-ref>.supabase.co",
+    SUPABASE_ANON_KEY: "<anon-public-key>"
+};
 ```
 
-## Displayed Data
+Do not commit secrets.
 
-The frontend currently displays:
+---
 
-```text
-Summary metrics
-Snapshot window
-Character level changes
-Guild joins
-Guild leaves
-Rank changes
-```
+## Legacy Note
 
-## Notes
+Earlier versions of this frontend called a local FastAPI backend. That is no longer the production architecture.
 
-This frontend is currently a local static website. In a later phase, it can be served through a frontend container, deployed to a hosting platform, and connected to a custom domain.
+The current frontend reads directly from Supabase REST API views.
