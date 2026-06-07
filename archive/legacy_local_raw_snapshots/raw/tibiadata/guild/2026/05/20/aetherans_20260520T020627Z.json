@@ -1,0 +1,626 @@
+{
+  "metadata": {
+    "source": "tibiadata",
+    "entity_type": "guild",
+    "entity_name": "Aetherans",
+    "extracted_at_utc": "2026-05-20T02:06:27.928569+00:00"
+  },
+  "data": {
+    "guild": {
+      "name": "Aetherans",
+      "world": "Aethera",
+      "logo_url": "https://static.tibia.com/images/community/default_logo.gif",
+      "description": "",
+      "guildhalls": null,
+      "active": true,
+      "founded": "2026-03-14",
+      "open_applications": true,
+      "homepage": "",
+      "in_war": false,
+      "disband_date": "",
+      "disband_condition": "",
+      "players_online": 11,
+      "players_offline": 53,
+      "members_total": 64,
+      "members_invited": 1,
+      "members": [
+        {
+          "name": "Mean Dawg",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 602,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Affirmation",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 725,
+          "joined": "2026-03-15",
+          "status": "online"
+        },
+        {
+          "name": "Chanokkz",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 609,
+          "joined": "2026-03-20",
+          "status": "online"
+        },
+        {
+          "name": "Dope Dawg",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 710,
+          "joined": "2026-03-15",
+          "status": "online"
+        },
+        {
+          "name": "Dosadi",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 634,
+          "joined": "2026-03-14",
+          "status": "offline"
+        },
+        {
+          "name": "Druid Perfecct",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 559,
+          "joined": "2026-03-19",
+          "status": "online"
+        },
+        {
+          "name": "Kyranx Fullks",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 730,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Warhnds",
+          "title": "Gnomeland Securty",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 707,
+          "joined": "2026-03-14",
+          "status": "offline"
+        },
+        {
+          "name": "Aesthetic Jessy",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 316,
+          "joined": "2026-05-11",
+          "status": "offline"
+        },
+        {
+          "name": "Alex Noplay",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Druid",
+          "level": 51,
+          "joined": "2026-03-17",
+          "status": "offline"
+        },
+        {
+          "name": "American Spirits",
+          "title": "Druid Slve",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 547,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Annirak",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 377,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Badeka",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 516,
+          "joined": "2026-03-17",
+          "status": "offline"
+        },
+        {
+          "name": "Be Jayy Jayy",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 653,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Bibhatsu",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 569,
+          "joined": "2026-05-04",
+          "status": "offline"
+        },
+        {
+          "name": "Billy Jhony",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 336,
+          "joined": "2026-05-15",
+          "status": "offline"
+        },
+        {
+          "name": "Boward Evercuz",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 545,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Camel Crush",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 783,
+          "joined": "2026-04-26",
+          "status": "offline"
+        },
+        {
+          "name": "Chanekkee",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Exalted Monk",
+          "level": 519,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Chanomanee",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 115,
+          "joined": "2026-04-15",
+          "status": "offline"
+        },
+        {
+          "name": "Ciggy Focus",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 294,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Ciggy Lamar",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 246,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Crimes",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 686,
+          "joined": "2026-03-24",
+          "status": "offline"
+        },
+        {
+          "name": "Dhanvantari Ayurveda",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 417,
+          "joined": "2026-05-03",
+          "status": "offline"
+        },
+        {
+          "name": "Diabetico Infernal",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 494,
+          "joined": "2026-03-18",
+          "status": "offline"
+        },
+        {
+          "name": "Dizkovery",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 362,
+          "joined": "2026-04-27",
+          "status": "offline"
+        },
+        {
+          "name": "Doda Step",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 505,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Falcox",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 376,
+          "joined": "2026-04-22",
+          "status": "online"
+        },
+        {
+          "name": "Fisiolasty",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 332,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Fourrttwenty",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 371,
+          "joined": "2026-03-16",
+          "status": "offline"
+        },
+        {
+          "name": "Future Blind",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 395,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Goodeka",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 543,
+          "joined": "2026-03-15",
+          "status": "online"
+        },
+        {
+          "name": "Iluminado",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 345,
+          "joined": "2026-05-19",
+          "status": "online"
+        },
+        {
+          "name": "Jassped",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 559,
+          "joined": "2026-03-21",
+          "status": "offline"
+        },
+        {
+          "name": "Jawsh Da Archer",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 340,
+          "joined": "2026-03-15",
+          "status": "online"
+        },
+        {
+          "name": "Joao Mendonca",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 307,
+          "joined": "2026-03-22",
+          "status": "online"
+        },
+        {
+          "name": "Joka Unstoppable",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 248,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Knight perfecct",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 503,
+          "joined": "2026-03-19",
+          "status": "offline"
+        },
+        {
+          "name": "Krrazy",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 380,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Lazrab",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 457,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Long Dawg",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 103,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Mad Grandpa",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 728,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Murqish",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Exalted Monk",
+          "level": 284,
+          "joined": "2026-03-16",
+          "status": "offline"
+        },
+        {
+          "name": "Og Jawsh",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 388,
+          "joined": "2026-04-24",
+          "status": "offline"
+        },
+        {
+          "name": "Onyx Knight",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 646,
+          "joined": "2026-04-16",
+          "status": "offline"
+        },
+        {
+          "name": "Oriiente Stylo",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Knight",
+          "level": 26,
+          "joined": "2026-03-17",
+          "status": "offline"
+        },
+        {
+          "name": "Oriion Rutis",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 361,
+          "joined": "2026-05-05",
+          "status": "offline"
+        },
+        {
+          "name": "Pact",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Exalted Monk",
+          "level": 417,
+          "joined": "2026-05-12",
+          "status": "offline"
+        },
+        {
+          "name": "Pally Supreme",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 413,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Parantapa",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 300,
+          "joined": "2026-03-31",
+          "status": "offline"
+        },
+        {
+          "name": "Pyroflames",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 1040,
+          "joined": "2026-04-15",
+          "status": "offline"
+        },
+        {
+          "name": "Retired Rowe",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 528,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Samantha Life",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 560,
+          "joined": "2026-04-10",
+          "status": "offline"
+        },
+        {
+          "name": "Samso",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 352,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Shaedy",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 363,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Shaneomac",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 242,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Shaneomacc",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 544,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Thea Hena",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 365,
+          "joined": "2026-04-03",
+          "status": "offline"
+        },
+        {
+          "name": "Torsten Voges",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 466,
+          "joined": "2026-03-22",
+          "status": "online"
+        },
+        {
+          "name": "Vist Nigo",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Elite Knight",
+          "level": 357,
+          "joined": "2026-03-15",
+          "status": "offline"
+        },
+        {
+          "name": "Wunux",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Master Sorcerer",
+          "level": 356,
+          "joined": "2026-03-14",
+          "status": "online"
+        },
+        {
+          "name": "Yefry King",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 618,
+          "joined": "2026-04-10",
+          "status": "offline"
+        },
+        {
+          "name": "Yefry Massacre",
+          "title": "",
+          "rank": "Legend",
+          "vocation": "Royal Paladin",
+          "level": 420,
+          "joined": "2026-04-07",
+          "status": "offline"
+        },
+        {
+          "name": "Zachary Nocare",
+          "title": "Four Step",
+          "rank": "Legend",
+          "vocation": "Elder Druid",
+          "level": 409,
+          "joined": "2026-03-15",
+          "status": "offline"
+        }
+      ],
+      "invites": [
+        {
+          "name": "Sea Bass",
+          "date": "2026-05-15"
+        }
+      ]
+    },
+    "information": {
+      "api": {
+        "version": 4,
+        "release": "4.8.0",
+        "commit": "e3963de0848d8ce9d368a9cd54b306ccfddd0d15"
+      },
+      "timestamp": "2026-05-20T02:06:26Z",
+      "tibia_urls": [
+        "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=Aetherans"
+      ],
+      "status": {
+        "http_code": 200
+      }
+    }
+  }
+}

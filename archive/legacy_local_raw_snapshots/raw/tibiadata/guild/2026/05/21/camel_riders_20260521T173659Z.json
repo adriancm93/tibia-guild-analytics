@@ -1,0 +1,369 @@
+{
+  "metadata": {
+    "source": "tibiadata",
+    "entity_type": "guild",
+    "entity_name": "Camel riders",
+    "extracted_at_utc": "2026-05-21T17:36:59.702402+00:00"
+  },
+  "data": {
+    "guild": {
+      "name": "Camel riders",
+      "world": "Antica",
+      "logo_url": "https://static.tibia.com/images/community/default_logo.gif",
+      "description": "",
+      "guildhalls": null,
+      "active": true,
+      "founded": "2025-04-29",
+      "open_applications": true,
+      "homepage": "",
+      "in_war": false,
+      "disband_date": "",
+      "disband_condition": "",
+      "players_online": 2,
+      "players_offline": 34,
+      "members_total": 36,
+      "members_invited": 0,
+      "members": [
+        {
+          "name": "Yoshi Phin",
+          "title": "",
+          "rank": "Leader",
+          "vocation": "Elite Knight",
+          "level": 494,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Archercatore",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Elder Druid",
+          "level": 728,
+          "joined": "2026-01-13",
+          "status": "offline"
+        },
+        {
+          "name": "China Empurra Mole",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Master Sorcerer",
+          "level": 621,
+          "joined": "2026-04-14",
+          "status": "offline"
+        },
+        {
+          "name": "Moozambookoo",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Master Sorcerer",
+          "level": 859,
+          "joined": "2026-01-08",
+          "status": "online"
+        },
+        {
+          "name": "Nazgul Rush",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Druid",
+          "level": 133,
+          "joined": "2025-07-05",
+          "status": "offline"
+        },
+        {
+          "name": "Parli Nohands",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Royal Paladin",
+          "level": 731,
+          "joined": "2026-01-13",
+          "status": "offline"
+        },
+        {
+          "name": "Tanque Tancador",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Elite Knight",
+          "level": 631,
+          "joined": "2026-03-22",
+          "status": "offline"
+        },
+        {
+          "name": "Tpeszu",
+          "title": "",
+          "rank": "Vice Leader",
+          "vocation": "Elite Knight",
+          "level": 822,
+          "joined": "2025-08-25",
+          "status": "offline"
+        },
+        {
+          "name": "Abou Aze",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Master Sorcerer",
+          "level": 612,
+          "joined": "2025-10-10",
+          "status": "offline"
+        },
+        {
+          "name": "Aleksander Wielki Silacz",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Druid",
+          "level": 293,
+          "joined": "2026-01-05",
+          "status": "online"
+        },
+        {
+          "name": "Alphonso Capone",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Sorcerer",
+          "level": 59,
+          "joined": "2025-12-13",
+          "status": "offline"
+        },
+        {
+          "name": "Azethos",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Master Sorcerer",
+          "level": 297,
+          "joined": "2025-10-10",
+          "status": "offline"
+        },
+        {
+          "name": "Corrupted Parli",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Elite Knight",
+          "level": 574,
+          "joined": "2025-12-04",
+          "status": "offline"
+        },
+        {
+          "name": "Cyclopp Edroon",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Knight",
+          "level": 17,
+          "joined": "2025-06-23",
+          "status": "offline"
+        },
+        {
+          "name": "Fhenlim Pacifico",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Druid",
+          "level": 505,
+          "joined": "2026-03-10",
+          "status": "offline"
+        },
+        {
+          "name": "Filthytoes",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Master Sorcerer",
+          "level": 177,
+          "joined": "2025-09-12",
+          "status": "offline"
+        },
+        {
+          "name": "Godszinho",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Elder Druid",
+          "level": 381,
+          "joined": "2026-04-22",
+          "status": "offline"
+        },
+        {
+          "name": "Ivanx Inflame",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Druid",
+          "level": 369,
+          "joined": "2025-07-16",
+          "status": "offline"
+        },
+        {
+          "name": "Kajo Kaan",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Knight",
+          "level": 265,
+          "joined": "2025-07-01",
+          "status": "offline"
+        },
+        {
+          "name": "Kamis",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Elder Druid",
+          "level": 333,
+          "joined": "2026-04-14",
+          "status": "offline"
+        },
+        {
+          "name": "Ladraozao",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Royal Paladin",
+          "level": 494,
+          "joined": "2025-11-29",
+          "status": "offline"
+        },
+        {
+          "name": "Lookie Witounn",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Exalted Monk",
+          "level": 106,
+          "joined": "2026-02-15",
+          "status": "offline"
+        },
+        {
+          "name": "Macko Lastfiama",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Elder Druid",
+          "level": 87,
+          "joined": "2025-12-16",
+          "status": "offline"
+        },
+        {
+          "name": "Marquinho Blocker",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Knight",
+          "level": 865,
+          "joined": "2026-02-20",
+          "status": "offline"
+        },
+        {
+          "name": "Master Sorc Loko",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Master Sorcerer",
+          "level": 183,
+          "joined": "2026-04-24",
+          "status": "offline"
+        },
+        {
+          "name": "Mateusz Serek Wielki",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Master Sorcerer",
+          "level": 189,
+          "joined": "2026-01-05",
+          "status": "offline"
+        },
+        {
+          "name": "Niko Bombardier",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Sorcerer",
+          "level": 44,
+          "joined": "2025-12-13",
+          "status": "offline"
+        },
+        {
+          "name": "Not Lovelytoes",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Master Sorcerer",
+          "level": 274,
+          "joined": "2025-09-12",
+          "status": "offline"
+        },
+        {
+          "name": "Notime Formonk",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Monk",
+          "level": 22,
+          "joined": "2025-05-01",
+          "status": "offline"
+        },
+        {
+          "name": "Shaf Kaja",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Elite Knight",
+          "level": 36,
+          "joined": "2025-12-16",
+          "status": "offline"
+        },
+        {
+          "name": "Shasutiforu",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Royal Paladin",
+          "level": 38,
+          "joined": "2025-04-29",
+          "status": "offline"
+        },
+        {
+          "name": "Train Rapide",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Paladin",
+          "level": 19,
+          "joined": "2025-12-16",
+          "status": "offline"
+        },
+        {
+          "name": "Trollz Edron",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Knight",
+          "level": 11,
+          "joined": "2025-06-23",
+          "status": "offline"
+        },
+        {
+          "name": "Voldvia Erah",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Royal Paladin",
+          "level": 103,
+          "joined": "2025-11-19",
+          "status": "offline"
+        },
+        {
+          "name": "Witchees Bsse",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Knight",
+          "level": 14,
+          "joined": "2025-06-23",
+          "status": "offline"
+        },
+        {
+          "name": "Yakshumy Owl",
+          "title": "",
+          "rank": "Member",
+          "vocation": "Druid",
+          "level": 23,
+          "joined": "2026-01-30",
+          "status": "offline"
+        }
+      ],
+      "invites": null
+    },
+    "information": {
+      "api": {
+        "version": 4,
+        "release": "4.8.0",
+        "commit": "e3963de0848d8ce9d368a9cd54b306ccfddd0d15"
+      },
+      "timestamp": "2026-05-21T17:36:58Z",
+      "tibia_urls": [
+        "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=Camel+riders"
+      ],
+      "status": {
+        "http_code": 200
+      }
+    }
+  }
+}

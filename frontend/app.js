@@ -1,5 +1,3 @@
-const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || "http://127.0.0.1:8000";
-
 const worldSelectElement = document.getElementById("world-select");
 const guildSelectElement = document.getElementById("guild-select");
 const applyGuildSelectionButton = document.getElementById("apply-guild-selection");
@@ -455,19 +453,8 @@ function setDefaultDateRanges() {
     rankEndDateElement.value = defaultEndDate;
 }
 
-const DATA_SOURCE = window.APP_CONFIG?.DATA_SOURCE || "fastapi";
 const SUPABASE_URL = window.APP_CONFIG?.SUPABASE_URL || "";
 const SUPABASE_ANON_KEY = window.APP_CONFIG?.SUPABASE_ANON_KEY || "";
-
-async function fetchFastApi(endpoint) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`);
-
-    if (!response.ok) {
-        throw new Error(`FastAPI request failed: ${response.status}`);
-    }
-
-    return response.json();
-}
 
 async function fetchSupabase(viewName, queryString = "select=*") {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -494,112 +481,73 @@ async function fetchSnapshotDateBounds() {
 }
 
 async function fetchWorlds() {
-    if (DATA_SOURCE === "supabase") {
-        return fetchSupabase("api_worlds", "select=*&order=world_name.asc");
-    }
-
-    return [];
+    return fetchSupabase("api_worlds", "select=*&order=world_name.asc");
 }
 
 async function fetchGuilds() {
-    if (DATA_SOURCE === "supabase") {
-        return fetchSupabase("api_guilds", "select=*&order=world.asc,guild_name.asc");
-    }
-
-    return [];
+    return fetchSupabase("api_guilds", "select=*&order=world.asc,guild_name.asc");
 }
 
 async function fetchSnapshotDateBoundsForSelectedGuild() {
-    if (DATA_SOURCE === "supabase") {
-        const query = appendGuildFilters("select=*");
-        const rows = await fetchSupabase("api_snapshot_date_bounds_by_guild", query);
-        return rows[0] || {};
-    }
-
-    return {
-        min_snapshot_time: null,
-        max_snapshot_time: null
-    };
+    const query = appendGuildFilters("select=*");
+    const rows = await fetchSupabase("api_snapshot_date_bounds_by_guild", query);
+    return rows[0] || {};
 }
 
 async function fetchLevelChanges(dateRange = null) {
-    if (DATA_SOURCE === "supabase") {
-        let query = appendGuildFilters(
-            "select=*&order=latest_snapshot_time.desc,level_gain.desc,current_level.desc"
-        );
+    let query = appendGuildFilters(
+        "select=*&order=latest_snapshot_time.desc,level_gain.desc,current_level.desc"
+    );
 
-        query = buildSupabaseDateRangeQuery(query, dateRange);
+    query = buildSupabaseDateRangeQuery(query, dateRange);
 
-        return fetchSupabase("api_historical_character_level_changes", query);
-    }
-
-    return fetchFastApi("/api/level-changes");
+    return fetchSupabase("api_historical_character_level_changes", query);
 }
 
 async function fetchGuildJoins(dateRange = null) {
-    if (DATA_SOURCE === "supabase") {
-        let query = appendGuildFilters(
-            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc"
-        );
+    let query = appendGuildFilters(
+        "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc"
+    );
 
-        query = buildSupabaseDateRangeQuery(query, dateRange);
+    query = buildSupabaseDateRangeQuery(query, dateRange);
 
-        return fetchSupabase("api_historical_guild_joins", query);
-    }
-
-    return fetchFastApi("/api/guild-joins");
+    return fetchSupabase("api_historical_guild_joins", query);
 }
 
 async function fetchGuildLeaves(dateRange = null) {
-    if (DATA_SOURCE === "supabase") {
-        let query = appendGuildFilters(
-            "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc"
-        );
+    let query = appendGuildFilters(
+        "select=*&order=latest_snapshot_time.desc,level.desc,character_name.asc"
+    );
 
-        query = buildSupabaseDateRangeQuery(query, dateRange);
+    query = buildSupabaseDateRangeQuery(query, dateRange);
 
-        return fetchSupabase("api_historical_guild_leaves", query);
-    }
-
-    return fetchFastApi("/api/guild-leaves");
+    return fetchSupabase("api_historical_guild_leaves", query);
 }
 
 async function fetchRankChanges(dateRange = null) {
-    if (DATA_SOURCE === "supabase") {
-        let query = appendGuildFilters(
-            "select=*&order=latest_snapshot_time.desc,character_name.asc"
-        );
+    let query = appendGuildFilters(
+        "select=*&order=latest_snapshot_time.desc,character_name.asc"
+    );
 
-        query = buildSupabaseDateRangeQuery(query, dateRange);
+    query = buildSupabaseDateRangeQuery(query, dateRange);
 
-        return fetchSupabase("api_historical_rank_changes", query);
-    }
-
-    return fetchFastApi("/api/rank-changes");
+    return fetchSupabase("api_historical_rank_changes", query);
 }
 
 async function fetchGuildMembers() {
-    if (DATA_SOURCE === "supabase") {
-        const query = appendGuildFilters(
-            "select=*&order=current_level.desc,character_name.asc"
-        );
+    const query = appendGuildFilters(
+        "select=*&order=current_level.desc,character_name.asc"
+    );
 
-        return fetchSupabase("api_latest_guild_members", query);
-    }
-
-    return [];
+    return fetchSupabase("api_latest_guild_members", query);
 }
 
 async function fetchGuildOverview() {
-    if (DATA_SOURCE === "supabase") {
-        const query = appendGuildFilters(
-            "select=*&order=snapshot_time.desc&limit=1"
-        );
+    const query = appendGuildFilters(
+        "select=*&order=snapshot_time.desc&limit=1"
+    );
 
-        return fetchSupabase("api_guild_overview_by_snapshot", query);
-    }
-
-    return [];
+    return fetchSupabase("api_guild_overview_by_snapshot", query);
 }
 
 function renderGuildOverview(rows) {

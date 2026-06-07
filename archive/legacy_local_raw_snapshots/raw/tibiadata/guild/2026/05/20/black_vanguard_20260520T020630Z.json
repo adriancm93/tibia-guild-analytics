@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "source": "tibiadata",
+    "entity_type": "guild",
+    "entity_name": "Black Vanguard",
+    "extracted_at_utc": "2026-05-20T02:06:30.235064+00:00"
+  },
+  "data": {
+    "guild": {
+      "name": "Black Vanguard",
+      "world": "Aethera",
+      "logo_url": "https://static.tibia.com/images/guildlogos/Black_Vanguard.gif",
+      "description": "“No buscamos la guerra, pero somos el final de todas ellas.”\n\nEn las vastas y antiguas tierras de Tibia, el honor es una moneda que pocos pueden pagar. La Black Vanguard nace de la convicción de que el verdadero poder reside en la maestría, la calma antes de la tormenta y la lealtad inquebrantable a quienes caminan a nuestro lado.Bajo la serena pero firme dirección de Dragon Sani, nos define un lema de honor: “PRIMEROS EN LA BATALLA, ÚLTIMOS EN SALIR”",
+      "guildhalls": [
+        {
+          "name": "Dark Mansion",
+          "world": "Aethera",
+          "paid_until": "2026-06-01"
+        }
+      ],
+      "active": true,
+      "founded": "2026-03-25",
+      "open_applications": true,
+      "homepage": "",
+      "in_war": false,
+      "disband_date": "",
+      "disband_condition": "",
+      "players_online": 4,
+      "players_offline": 17,
+      "members_total": 21,
+      "members_invited": 0,
+      "members": [
+        {
+          "name": "Dragon sani",
+          "title": "Vanguard Main",
+          "rank": "Supreme Commander",
+          "vocation": "Elite Knight",
+          "level": 204,
+          "joined": "2026-03-27",
+          "status": "offline"
+        },
+        {
+          "name": "Aryon Thoonus",
+          "title": "Vanguard Main",
+          "rank": "Black Alpha",
+          "vocation": "Elite Knight",
+          "level": 234,
+          "joined": "2026-04-22",
+          "status": "offline"
+        },
+        {
+          "name": "Onuda Pez",
+          "title": "Vanguard",
+          "rank": "Black Alpha",
+          "vocation": "Elite Knight",
+          "level": 157,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Pudy Serenus",
+          "title": "Ravager Main",
+          "rank": "Black Alpha",
+          "vocation": "Exalted Monk",
+          "level": 220,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Rigo mortis",
+          "title": "Vanguard",
+          "rank": "Black Alpha",
+          "vocation": "Elite Knight",
+          "level": 152,
+          "joined": "2026-03-29",
+          "status": "online"
+        },
+        {
+          "name": "Nikola Joelic",
+          "title": "Medic combat",
+          "rank": "Black Capitan",
+          "vocation": "Elder Druid",
+          "level": 203,
+          "joined": "2026-05-17",
+          "status": "online"
+        },
+        {
+          "name": "Phantrox",
+          "title": "Vanguard",
+          "rank": "Black Capitan",
+          "vocation": "Elite Knight",
+          "level": 205,
+          "joined": "2026-05-19",
+          "status": "online"
+        },
+        {
+          "name": "Sir Him",
+          "title": "Ballistic",
+          "rank": "Black Capitan",
+          "vocation": "Royal Paladin",
+          "level": 141,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Dragon the Seventh",
+          "title": "Ballistic",
+          "rank": "Black Lieutenant",
+          "vocation": "Royal Paladin",
+          "level": 150,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Kina sinmanos",
+          "title": "Vanguard",
+          "rank": "Black Lieutenant",
+          "vocation": "Elite Knight",
+          "level": 115,
+          "joined": "2026-03-26",
+          "status": "offline"
+        },
+        {
+          "name": "Xo Colatl",
+          "title": "Medic combat",
+          "rank": "Black Lieutenant",
+          "vocation": "Elder Druid",
+          "level": 138,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Poyoyoi",
+          "title": "",
+          "rank": "Black Sergeant",
+          "vocation": "Elite Knight",
+          "level": 72,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Pudy Sagittarius",
+          "title": "Ballistic",
+          "rank": "Black Sergeant",
+          "vocation": "Royal Paladin",
+          "level": 67,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Jean Vladys",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 73,
+          "joined": "2026-04-16",
+          "status": "offline"
+        },
+        {
+          "name": "Nightslicer",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Elite Knight",
+          "level": 35,
+          "joined": "2026-03-25",
+          "status": "offline"
+        },
+        {
+          "name": "Dragon Pacifico",
+          "title": "",
+          "rank": "Recruit",
+          "vocation": "Monk",
+          "level": 21,
+          "joined": "2026-04-22",
+          "status": "offline"
+        },
+        {
+          "name": "Jiggssaw",
+          "title": "",
+          "rank": "Recruit",
+          "vocation": "Knight",
+          "level": 36,
+          "joined": "2026-05-09",
+          "status": "online"
+        },
+        {
+          "name": "Larryknonga",
+          "title": "",
+          "rank": "Recruit",
+          "vocation": "Sorcerer",
+          "level": 35,
+          "joined": "2026-05-18",
+          "status": "offline"
+        },
+        {
+          "name": "Natura Dragon",
+          "title": "",
+          "rank": "Recruit",
+          "vocation": "Druid",
+          "level": 42,
+          "joined": "2026-04-22",
+          "status": "offline"
+        },
+        {
+          "name": "Rashid el Rookstayer",
+          "title": "",
+          "rank": "Recruit",
+          "vocation": "None",
+          "level": 7,
+          "joined": "2026-04-22",
+          "status": "offline"
+        },
+        {
+          "name": "Zuarksh Evard Primera",
+          "title": "",
+          "rank": "Recruit",
+          "vocation": "Master Sorcerer",
+          "level": 29,
+          "joined": "2026-05-17",
+          "status": "offline"
+        }
+      ],
+      "invites": null
+    },
+    "information": {
+      "api": {
+        "version": 4,
+        "release": "4.8.0",
+        "commit": "e3963de0848d8ce9d368a9cd54b306ccfddd0d15"
+      },
+      "timestamp": "2026-05-20T02:06:30Z",
+      "tibia_urls": [
+        "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=Black+Vanguard"
+      ],
+      "status": {
+        "http_code": 200
+      }
+    }
+  }
+}

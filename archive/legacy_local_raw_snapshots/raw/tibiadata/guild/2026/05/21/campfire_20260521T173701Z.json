@@ -1,0 +1,420 @@
+{
+  "metadata": {
+    "source": "tibiadata",
+    "entity_type": "guild",
+    "entity_name": "Campfire",
+    "extracted_at_utc": "2026-05-21T17:37:01.694266+00:00"
+  },
+  "data": {
+    "guild": {
+      "name": "Campfire",
+      "world": "Antica",
+      "logo_url": "https://static.tibia.com/images/guildlogos/Campfire.gif",
+      "description": "",
+      "guildhalls": [
+        {
+          "name": "Shark Manor",
+          "world": "Antica",
+          "paid_until": "2026-05-24"
+        }
+      ],
+      "active": true,
+      "founded": "2023-10-30",
+      "open_applications": true,
+      "homepage": "",
+      "in_war": false,
+      "disband_date": "",
+      "disband_condition": "",
+      "players_online": 1,
+      "players_offline": 40,
+      "members_total": 41,
+      "members_invited": 0,
+      "members": [
+        {
+          "name": "Jaanuusz",
+          "title": "",
+          "rank": "Burning Coal",
+          "vocation": "Elder Druid",
+          "level": 753,
+          "joined": "2023-10-30",
+          "status": "offline"
+        },
+        {
+          "name": "Definitely Not Nanik",
+          "title": "",
+          "rank": "Lit Briquette",
+          "vocation": "Elite Knight",
+          "level": 804,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Ragusia",
+          "title": "",
+          "rank": "Lit Briquette",
+          "vocation": "Elite Knight",
+          "level": 191,
+          "joined": "2023-11-12",
+          "status": "offline"
+        },
+        {
+          "name": "Sila Dominator",
+          "title": "",
+          "rank": "Lit Briquette",
+          "vocation": "Elder Druid",
+          "level": 102,
+          "joined": "2024-03-10",
+          "status": "offline"
+        },
+        {
+          "name": "Sonzai",
+          "title": "",
+          "rank": "Lit Briquette",
+          "vocation": "Master Sorcerer",
+          "level": 1003,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Weterynarka",
+          "title": "",
+          "rank": "Lit Briquette",
+          "vocation": "Royal Paladin",
+          "level": 757,
+          "joined": "2023-11-01",
+          "status": "online"
+        },
+        {
+          "name": "Dansee Salsa",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Elder Druid",
+          "level": 160,
+          "joined": "2024-06-25",
+          "status": "offline"
+        },
+        {
+          "name": "Fara Calor",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Elite Knight",
+          "level": 178,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Hubardo Grovekeeper",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Elder Druid",
+          "level": 270,
+          "joined": "2023-11-04",
+          "status": "offline"
+        },
+        {
+          "name": "Hubardo Skullcrusher",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Elite Knight",
+          "level": 441,
+          "joined": "2023-11-04",
+          "status": "offline"
+        },
+        {
+          "name": "Jestes Czarodziejem Harry",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Master Sorcerer",
+          "level": 151,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Megapint",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Elite Knight",
+          "level": 467,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Nameless Exile",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Exalted Monk",
+          "level": 281,
+          "joined": "2025-04-11",
+          "status": "offline"
+        },
+        {
+          "name": "Ruined Bow",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Royal Paladin",
+          "level": 115,
+          "joined": "2024-06-23",
+          "status": "offline"
+        },
+        {
+          "name": "Szefuniu Klubu Disco",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Royal Paladin",
+          "level": 196,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Teverb",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Master Sorcerer",
+          "level": 105,
+          "joined": "2025-09-07",
+          "status": "offline"
+        },
+        {
+          "name": "Yamaro Golden Boy",
+          "title": "",
+          "rank": "Moisty Branch",
+          "vocation": "Royal Paladin",
+          "level": 157,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Cztery",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Dwa",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Dziesienc",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Osiem",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Pienc",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Pierwszy",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Siedem",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Szesc",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec Trzy",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zmouthowiec dzjewienc",
+          "title": "",
+          "rank": "Roshamuul Box Enjoyers",
+          "vocation": "Knight",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Cara Pepzi",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Master Sorcerer",
+          "level": 88,
+          "joined": "2024-06-04",
+          "status": "offline"
+        },
+        {
+          "name": "Krzyk Pelikana",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Master Sorcerer",
+          "level": 77,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Napalony Bombowiec",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Master Sorcerer",
+          "level": 50,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Profanator Zwlok",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Master Sorcerer",
+          "level": 61,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Scorched Flame",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Master Sorcerer",
+          "level": 63,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Szybki Bezbolesny Zgon",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Master Sorcerer",
+          "level": 66,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Zla Zakonnica",
+          "title": "",
+          "rank": "Special Force",
+          "vocation": "Elder Druid",
+          "level": 84,
+          "joined": "2023-11-01",
+          "status": "offline"
+        },
+        {
+          "name": "Amaimonn",
+          "title": "",
+          "rank": "Little Stick",
+          "vocation": "Royal Paladin",
+          "level": 98,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Bardzo Rudy Jamnik",
+          "title": "",
+          "rank": "Little Stick",
+          "vocation": "Royal Paladin",
+          "level": 35,
+          "joined": "2024-06-12",
+          "status": "offline"
+        },
+        {
+          "name": "Kucharz Rzan Piera",
+          "title": "",
+          "rank": "Seedling",
+          "vocation": "Exalted Monk",
+          "level": 35,
+          "joined": "2025-05-02",
+          "status": "offline"
+        },
+        {
+          "name": "Piensciasz",
+          "title": "",
+          "rank": "Seedling",
+          "vocation": "Exalted Monk",
+          "level": 35,
+          "joined": "2025-05-02",
+          "status": "offline"
+        },
+        {
+          "name": "Potenrzne Uderzenie",
+          "title": "",
+          "rank": "Seedling",
+          "vocation": "Exalted Monk",
+          "level": 35,
+          "joined": "2025-05-02",
+          "status": "offline"
+        },
+        {
+          "name": "Rozbijacz Rzuhwy",
+          "title": "",
+          "rank": "Seedling",
+          "vocation": "Exalted Monk",
+          "level": 35,
+          "joined": "2025-05-02",
+          "status": "offline"
+        },
+        {
+          "name": "Rzulty Papiesz",
+          "title": "",
+          "rank": "Seedling",
+          "vocation": "Exalted Monk",
+          "level": 35,
+          "joined": "2025-05-02",
+          "status": "offline"
+        }
+      ],
+      "invites": null
+    },
+    "information": {
+      "api": {
+        "version": 4,
+        "release": "4.8.0",
+        "commit": "e3963de0848d8ce9d368a9cd54b306ccfddd0d15"
+      },
+      "timestamp": "2026-05-21T17:37:01Z",
+      "tibia_urls": [
+        "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=Campfire"
+      ],
+      "status": {
+        "http_code": 200
+      }
+    }
+  }
+}

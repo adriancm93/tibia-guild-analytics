@@ -1,0 +1,929 @@
+{
+  "metadata": {
+    "source": "tibiadata",
+    "entity_type": "guild",
+    "entity_name": "Black Clover",
+    "extracted_at_utc": "2026-05-14T23:02:10.231618+00:00"
+  },
+  "data": {
+    "guild": {
+      "name": "Black Clover",
+      "world": "Lobera",
+      "logo_url": "https://static.tibia.com/images/guildlogos/Black_Clover.gif",
+      "description": "hola somos un gremio amistoso  y neutral\nRequisitos Lvl 80+ \n\n\n\nQue ofrecemos \nsalir a hunt en team\nhacer quest o ayudar a hacer quest\nbesteary \nbosses",
+      "guildhalls": [
+        {
+          "name": "Bronze Brothers Bastion",
+          "world": "Lobera",
+          "paid_until": "2026-06-01"
+        }
+      ],
+      "active": true,
+      "founded": "2025-09-07",
+      "open_applications": true,
+      "homepage": "?action=externallinkwarning&amp;target=https%3A%2F%2Fwww.facebook.com%2Fshare%2F18M4wzWL28%2F%3Fmibextid%3DwwXIfr",
+      "in_war": false,
+      "disband_date": "",
+      "disband_condition": "",
+      "players_online": 5,
+      "players_offline": 92,
+      "members_total": 97,
+      "members_invited": 1,
+      "members": [
+        {
+          "name": "Jefe Anthony",
+          "title": "",
+          "rank": "Black Leader",
+          "vocation": "Elite Knight",
+          "level": 697,
+          "joined": "2026-03-29",
+          "status": "offline"
+        },
+        {
+          "name": "Aleiz",
+          "title": "",
+          "rank": "Black Sages",
+          "vocation": "Royal Paladin",
+          "level": 513,
+          "joined": "2025-11-27",
+          "status": "offline"
+        },
+        {
+          "name": "Kryvatu",
+          "title": "",
+          "rank": "Black Sages",
+          "vocation": "Elite Knight",
+          "level": 473,
+          "joined": "2026-02-13",
+          "status": "offline"
+        },
+        {
+          "name": "Le curandero",
+          "title": "",
+          "rank": "Black Sages",
+          "vocation": "Elder Druid",
+          "level": 274,
+          "joined": "2025-09-28",
+          "status": "offline"
+        },
+        {
+          "name": "Lord Gotav",
+          "title": "",
+          "rank": "Black Sages",
+          "vocation": "Royal Paladin",
+          "level": 280,
+          "joined": "2025-09-26",
+          "status": "offline"
+        },
+        {
+          "name": "Skyler Fall",
+          "title": "",
+          "rank": "Black Sages",
+          "vocation": "Elite Knight",
+          "level": 300,
+          "joined": "2025-09-11",
+          "status": "offline"
+        },
+        {
+          "name": "Trogodita",
+          "title": "",
+          "rank": "Black Sages",
+          "vocation": "Elder Druid",
+          "level": 520,
+          "joined": "2025-10-18",
+          "status": "offline"
+        },
+        {
+          "name": "Duendemen Shelby",
+          "title": "",
+          "rank": "Black Viceleader",
+          "vocation": "Royal Paladin",
+          "level": 526,
+          "joined": "2026-04-18",
+          "status": "offline"
+        },
+        {
+          "name": "La Hielera",
+          "title": "",
+          "rank": "Black Viceleader",
+          "vocation": "Elite Knight",
+          "level": 146,
+          "joined": "2025-12-08",
+          "status": "offline"
+        },
+        {
+          "name": "Pokzita",
+          "title": "",
+          "rank": "Black Viceleader",
+          "vocation": "Elder Druid",
+          "level": 389,
+          "joined": "2026-05-02",
+          "status": "offline"
+        },
+        {
+          "name": "Ek Bruta",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Elite Knight",
+          "level": 523,
+          "joined": "2025-11-05",
+          "status": "offline"
+        },
+        {
+          "name": "Lord puldog",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Elite Knight",
+          "level": 263,
+          "joined": "2025-10-25",
+          "status": "offline"
+        },
+        {
+          "name": "Max Saitama",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Exalted Monk",
+          "level": 261,
+          "joined": "2025-12-26",
+          "status": "online"
+        },
+        {
+          "name": "Mijo ed",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Elder Druid",
+          "level": 325,
+          "joined": "2026-01-09",
+          "status": "offline"
+        },
+        {
+          "name": "Momoshikii Otsutsuki",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Knight",
+          "level": 300,
+          "joined": "2025-11-21",
+          "status": "offline"
+        },
+        {
+          "name": "Mong Not Rush",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Master Sorcerer",
+          "level": 479,
+          "joined": "2026-04-30",
+          "status": "offline"
+        },
+        {
+          "name": "Negin du Murin",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Elite Knight",
+          "level": 539,
+          "joined": "2025-10-04",
+          "status": "offline"
+        },
+        {
+          "name": "Olimpo Black Ruso",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Master Sorcerer",
+          "level": 272,
+          "joined": "2025-09-07",
+          "status": "offline"
+        },
+        {
+          "name": "Parastorm",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Elder Druid",
+          "level": 383,
+          "joined": "2026-02-23",
+          "status": "offline"
+        },
+        {
+          "name": "Rampzx",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Sorcerer",
+          "level": 319,
+          "joined": "2025-09-18",
+          "status": "offline"
+        },
+        {
+          "name": "Rampzx ek",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Knight",
+          "level": 274,
+          "joined": "2025-10-03",
+          "status": "offline"
+        },
+        {
+          "name": "Rohan Lothbrok",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Royal Paladin",
+          "level": 272,
+          "joined": "2026-01-09",
+          "status": "offline"
+        },
+        {
+          "name": "Royal leontanos",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Royal Paladin",
+          "level": 258,
+          "joined": "2025-10-15",
+          "status": "offline"
+        },
+        {
+          "name": "Ryan From Hell",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Elite Knight",
+          "level": 164,
+          "joined": "2026-01-06",
+          "status": "offline"
+        },
+        {
+          "name": "Yumi Araki",
+          "title": "",
+          "rank": "Black General",
+          "vocation": "Royal Paladin",
+          "level": 274,
+          "joined": "2025-09-17",
+          "status": "offline"
+        },
+        {
+          "name": "Att Assasin",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Exalted Monk",
+          "level": 198,
+          "joined": "2026-03-07",
+          "status": "offline"
+        },
+        {
+          "name": "Berd Thos",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Royal Paladin",
+          "level": 132,
+          "joined": "2026-01-02",
+          "status": "offline"
+        },
+        {
+          "name": "Bhoks",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elite Knight",
+          "level": 150,
+          "joined": "2025-11-08",
+          "status": "offline"
+        },
+        {
+          "name": "Bruomyne Tuth",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elder Druid",
+          "level": 147,
+          "joined": "2025-12-20",
+          "status": "offline"
+        },
+        {
+          "name": "Dark Liiion",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Druid",
+          "level": 117,
+          "joined": "2025-09-10",
+          "status": "offline"
+        },
+        {
+          "name": "Eletrokz",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Master Sorcerer",
+          "level": 178,
+          "joined": "2026-03-26",
+          "status": "offline"
+        },
+        {
+          "name": "Fantasma Zapatista",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Master Sorcerer",
+          "level": 127,
+          "joined": "2026-03-31",
+          "status": "offline"
+        },
+        {
+          "name": "Francisco Pantera",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elder Druid",
+          "level": 138,
+          "joined": "2025-10-30",
+          "status": "offline"
+        },
+        {
+          "name": "Jide Phyx",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elite Knight",
+          "level": 147,
+          "joined": "2025-12-20",
+          "status": "offline"
+        },
+        {
+          "name": "Kuhlitz",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Royal Paladin",
+          "level": 307,
+          "joined": "2026-05-02",
+          "status": "offline"
+        },
+        {
+          "name": "Mante Ka",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Exalted Monk",
+          "level": 151,
+          "joined": "2026-04-02",
+          "status": "offline"
+        },
+        {
+          "name": "Merake Mettor",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elite Knight",
+          "level": 162,
+          "joined": "2025-12-20",
+          "status": "offline"
+        },
+        {
+          "name": "Monty Code",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elder Druid",
+          "level": 399,
+          "joined": "2026-04-27",
+          "status": "offline"
+        },
+        {
+          "name": "Mottor Psico",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Royal Paladin",
+          "level": 334,
+          "joined": "2026-04-18",
+          "status": "offline"
+        },
+        {
+          "name": "Neit Yeki",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Royal Paladin",
+          "level": 281,
+          "joined": "2026-02-07",
+          "status": "offline"
+        },
+        {
+          "name": "Seran Wine",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Royal Paladin",
+          "level": 288,
+          "joined": "2026-05-01",
+          "status": "offline"
+        },
+        {
+          "name": "Silah Leon",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Elder Druid",
+          "level": 127,
+          "joined": "2026-01-28",
+          "status": "offline"
+        },
+        {
+          "name": "Veruzk",
+          "title": "",
+          "rank": "Black Commander",
+          "vocation": "Royal Paladin",
+          "level": 142,
+          "joined": "2026-01-09",
+          "status": "offline"
+        },
+        {
+          "name": "Arepapower",
+          "title": "",
+          "rank": "Black Sergeant",
+          "vocation": "Exalted Monk",
+          "level": 55,
+          "joined": "2026-03-17",
+          "status": "offline"
+        },
+        {
+          "name": "Chorizon Macabro",
+          "title": "",
+          "rank": "Black Sergeant",
+          "vocation": "Elder Druid",
+          "level": 105,
+          "joined": "2026-04-02",
+          "status": "offline"
+        },
+        {
+          "name": "Joharvs",
+          "title": "",
+          "rank": "Black Sergeant",
+          "vocation": "Royal Paladin",
+          "level": 258,
+          "joined": "2026-04-15",
+          "status": "offline"
+        },
+        {
+          "name": "Julio Of Paladin",
+          "title": "",
+          "rank": "Black Sergeant",
+          "vocation": "Royal Paladin",
+          "level": 148,
+          "joined": "2026-04-23",
+          "status": "offline"
+        },
+        {
+          "name": "Tanque Sovieta",
+          "title": "",
+          "rank": "Black Sergeant",
+          "vocation": "Elite Knight",
+          "level": 111,
+          "joined": "2026-03-31",
+          "status": "offline"
+        },
+        {
+          "name": "Akonvolder",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 65,
+          "joined": "2026-04-30",
+          "status": "offline"
+        },
+        {
+          "name": "Alan Seductor",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Elite Knight",
+          "level": 130,
+          "joined": "2026-04-25",
+          "status": "online"
+        },
+        {
+          "name": "Alma Fuerte",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Elite Knight",
+          "level": 368,
+          "joined": "2026-05-06",
+          "status": "offline"
+        },
+        {
+          "name": "Brujita del barrio",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Monk",
+          "level": 29,
+          "joined": "2025-12-31",
+          "status": "offline"
+        },
+        {
+          "name": "Cabeza de jovito",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 370,
+          "joined": "2026-05-09",
+          "status": "offline"
+        },
+        {
+          "name": "Darandil",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Elder Druid",
+          "level": 120,
+          "joined": "2026-05-09",
+          "status": "offline"
+        },
+        {
+          "name": "Drathuz wolf",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 164,
+          "joined": "2026-05-06",
+          "status": "offline"
+        },
+        {
+          "name": "Masterelar",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Knight",
+          "level": 33,
+          "joined": "2026-04-30",
+          "status": "offline"
+        },
+        {
+          "name": "Maxx Stark",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 698,
+          "joined": "2026-04-30",
+          "status": "online"
+        },
+        {
+          "name": "Nemas de la oz",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 190,
+          "joined": "2026-05-06",
+          "status": "offline"
+        },
+        {
+          "name": "Ojo de Churea",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 149,
+          "joined": "2026-04-28",
+          "status": "offline"
+        },
+        {
+          "name": "Pakatela",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 178,
+          "joined": "2026-05-03",
+          "status": "online"
+        },
+        {
+          "name": "Psyone",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 361,
+          "joined": "2026-05-10",
+          "status": "offline"
+        },
+        {
+          "name": "Shottem",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 95,
+          "joined": "2026-05-10",
+          "status": "offline"
+        },
+        {
+          "name": "Sirius Juan",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Master Sorcerer",
+          "level": 41,
+          "joined": "2026-02-26",
+          "status": "offline"
+        },
+        {
+          "name": "Sukeno",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 159,
+          "joined": "2026-05-05",
+          "status": "offline"
+        },
+        {
+          "name": "Tankemzs",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Elite Knight",
+          "level": 455,
+          "joined": "2026-05-05",
+          "status": "offline"
+        },
+        {
+          "name": "Tano Mira",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Knight",
+          "level": 74,
+          "joined": "2026-04-18",
+          "status": "offline"
+        },
+        {
+          "name": "Trishula Ice Breaker",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 147,
+          "joined": "2026-05-12",
+          "status": "offline"
+        },
+        {
+          "name": "Vizaviza",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Royal Paladin",
+          "level": 76,
+          "joined": "2026-05-05",
+          "status": "offline"
+        },
+        {
+          "name": "Wezglowie",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Elite Knight",
+          "level": 204,
+          "joined": "2026-05-13",
+          "status": "offline"
+        },
+        {
+          "name": "Zhrooms",
+          "title": "",
+          "rank": "Black Soldier",
+          "vocation": "Exalted Monk",
+          "level": 313,
+          "joined": "2026-05-05",
+          "status": "offline"
+        },
+        {
+          "name": "Alan Genial",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 108,
+          "joined": "2025-10-13",
+          "status": "offline"
+        },
+        {
+          "name": "Athormentado",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 168,
+          "joined": "2025-11-10",
+          "status": "offline"
+        },
+        {
+          "name": "Azriana Klon",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 70,
+          "joined": "2026-04-18",
+          "status": "offline"
+        },
+        {
+          "name": "Capi Yami",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Master Sorcerer",
+          "level": 104,
+          "joined": "2026-03-26",
+          "status": "offline"
+        },
+        {
+          "name": "Cobra Rick",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elder Druid",
+          "level": 114,
+          "joined": "2026-05-14",
+          "status": "offline"
+        },
+        {
+          "name": "Coronel Esperanca",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 215,
+          "joined": "2026-05-06",
+          "status": "offline"
+        },
+        {
+          "name": "Dark Izis",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 188,
+          "joined": "2026-02-13",
+          "status": "offline"
+        },
+        {
+          "name": "Dead Silenciosa",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 116,
+          "joined": "2026-03-14",
+          "status": "offline"
+        },
+        {
+          "name": "Deja Glan",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Paladin",
+          "level": 102,
+          "joined": "2026-05-05",
+          "status": "online"
+        },
+        {
+          "name": "Dex Druid",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elder Druid",
+          "level": 116,
+          "joined": "2026-01-12",
+          "status": "offline"
+        },
+        {
+          "name": "El Chacorta",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 81,
+          "joined": "2026-03-06",
+          "status": "offline"
+        },
+        {
+          "name": "El Noa Noa",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 28,
+          "joined": "2026-04-02",
+          "status": "offline"
+        },
+        {
+          "name": "Eldilvert Shantus",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Exalted Monk",
+          "level": 161,
+          "joined": "2026-04-06",
+          "status": "offline"
+        },
+        {
+          "name": "Enda Abader",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Exalted Monk",
+          "level": 140,
+          "joined": "2025-10-15",
+          "status": "offline"
+        },
+        {
+          "name": "Excalibur seiber",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 118,
+          "joined": "2026-05-05",
+          "status": "offline"
+        },
+        {
+          "name": "Isturiz Royma",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 244,
+          "joined": "2026-05-14",
+          "status": "offline"
+        },
+        {
+          "name": "Legolas ligerus",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 65,
+          "joined": "2025-12-10",
+          "status": "offline"
+        },
+        {
+          "name": "Linyera",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 152,
+          "joined": "2026-03-06",
+          "status": "offline"
+        },
+        {
+          "name": "Mante Kosa",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Master Sorcerer",
+          "level": 86,
+          "joined": "2026-04-02",
+          "status": "offline"
+        },
+        {
+          "name": "Nahual Slayer",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 79,
+          "joined": "2026-04-28",
+          "status": "offline"
+        },
+        {
+          "name": "Nekiluz",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 162,
+          "joined": "2025-11-09",
+          "status": "offline"
+        },
+        {
+          "name": "Otro Jugador",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Master Sorcerer",
+          "level": 133,
+          "joined": "2025-09-30",
+          "status": "offline"
+        },
+        {
+          "name": "Rasisco",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 165,
+          "joined": "2026-03-23",
+          "status": "offline"
+        },
+        {
+          "name": "Rasisco el Fuerte",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 119,
+          "joined": "2026-01-27",
+          "status": "offline"
+        },
+        {
+          "name": "Royalsito",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Paladin",
+          "level": 78,
+          "joined": "2025-12-26",
+          "status": "offline"
+        },
+        {
+          "name": "Soza",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Elite Knight",
+          "level": 126,
+          "joined": "2026-03-17",
+          "status": "offline"
+        },
+        {
+          "name": "Ulility",
+          "title": "",
+          "rank": "Black",
+          "vocation": "Royal Paladin",
+          "level": 45,
+          "joined": "2026-01-07",
+          "status": "offline"
+        }
+      ],
+      "invites": [
+        {
+          "name": "Psicoactivo man",
+          "date": "2026-05-14"
+        }
+      ]
+    },
+    "information": {
+      "api": {
+        "version": 4,
+        "release": "4.8.0",
+        "commit": "e3963de0848d8ce9d368a9cd54b306ccfddd0d15"
+      },
+      "timestamp": "2026-05-14T23:01:29Z",
+      "tibia_urls": [
+        "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=Black+Clover"
+      ],
+      "status": {
+        "http_code": 200
+      }
+    }
+  }
+}
