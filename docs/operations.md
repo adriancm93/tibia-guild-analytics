@@ -1,638 +1,447 @@
-# Operations Guide
+# Operations
 
-This document describes how to operate, validate, and troubleshoot the Tibia Guild Analytics project.
+This document contains operational procedures for monitoring and troubleshooting Tibia Guild Analytics.
 
-The production system uses:
+The current production system uses:
 
 ```text
-GitHub Actions scheduled workflow
+Supabase Cron
         ↓
-Python ingestion pipeline
+Supabase Edge Function
         ↓
 Supabase Postgres
         ↓
-Supabase REST API
+Per-guild analytics cache tables
+        ↓
+Public API views
         ↓
 Cloudflare Pages frontend
 ```
 
 ---
 
-## Production Refresh Schedule
+## Key Operational Concepts
 
-The production ingestion workflow runs from GitHub Actions.
+### Raw data freshness
 
-Workflow file:
+Raw data freshness means new snapshots are being inserted into:
 
 ```text
-.github/workflows/scheduled_ingestion.yml
+public.guild_member_snapshot
 ```
 
-Current schedule:
+### Cache freshness
+
+Cache freshness means the per-guild analytics cache tables have been rebuilt after the latest raw snapshot.
+
+The most important cache for roster freshness is:
 
 ```text
-Every 15 minutes
+analytics.latest_guild_members_api_cache
 ```
 
-The workflow can also be run manually from GitHub:
+### Frontend freshness
+
+Frontend freshness means public API views reflect the current cache tables and the browser is loading the latest JavaScript/CSS.
+
+---
+
+## Monitor Supabase Cron
+
+In the Supabase dashboard:
 
 ```text
-GitHub repository
-→ Actions
-→ Scheduled Supabase Ingestion
-→ Run workflow
+Integrations → Cron
+```
+
+Confirm the scheduled job is running successfully.
+
+The cron job duration usually reflects how long it took Postgres to send the HTTP request, not necessarily the full ingestion duration. Use Edge Function logs to inspect ingestion behavior.
+
+---
+
+## Monitor Edge Function Logs
+
+In the Supabase dashboard:
+
+```text
+Edge Functions → refresh-guilds → Logs
+```
+
+Look for:
+
+- Claimed guild count
+- Success count
+- Failure count
+- Frontend cache refresh failures
+- TibiaData API errors
+- Database RPC errors
+
+A healthy response should include:
+
+```json
+{
+  "success": true,
+  "frontend_refresh_failure_count": 0
+}
 ```
 
 ---
 
-## Check GitHub Actions Status
+## Manual Edge Function Trigger
 
-To confirm the scheduled ingestion is running:
-
-```text
-GitHub repository
-→ Actions
-→ Scheduled Supabase Ingestion
-```
-
-A successful run should show green checks for:
-
-```text
-Check out repository
-Set up Python
-Install ingestion dependencies
-Confirm environment configuration
-Extract latest guild data
-Load latest snapshot to Supabase Postgres
-```
-
-If the workflow fails, open the failed run and inspect the failed step logs.
-
----
-
-## Required GitHub Secrets
-
-The scheduled workflow depends on repository secrets.
-
-Required secrets:
-
-```text
-TIBIA_GUILD_NAME
-TIBIA_WORLD
-SUPABASE_DB_HOST
-SUPABASE_DB_PORT
-SUPABASE_DB_NAME
-SUPABASE_DB_USER
-SUPABASE_DB_PASSWORD
-```
-
-These are configured in:
-
-```text
-GitHub repository
-→ Settings
-→ Secrets and variables
-→ Actions
-```
-
-Do not commit real credentials to the repository.
-
----
-
-## Connect to Supabase from Local Terminal
-
-The project uses a local `.env.supabase` file for connecting to Supabase from your machine.
-
-Example format:
-
-```env
-TIBIA_GUILD_NAME="Black Clover"
-TIBIA_WORLD=Lobera
-RAW_DATA_DIR=data/raw
-
-POSTGRES_HOST=<supabase-host>
-POSTGRES_PORT=<supabase-port>
-POSTGRES_DB=postgres
-POSTGRES_USER=<supabase-user>
-POSTGRES_PASSWORD=<supabase-password>
-```
-
-Export the variables:
+Use a manual trigger to test ingestion:
 
 ```bash
-set -a
-source .env.supabase
-set +a
+curl -i \
+  -X POST "https://<project-ref>.supabase.co/functions/v1/refresh-guilds" \
+  -H "Content-Type: application/json" \
+  -H "x-cron-secret: <secret>" \
+  -d '{"world":"Lobera","batch_size":5}'
 ```
 
-Use the local Docker Postgres container as a `psql` client:
+If the response has:
 
-```bash
-docker exec -it -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB"
+```json
+"claimed": 0
 ```
 
-Once connected, exit with:
+then no guilds were due for refresh.
+
+---
+
+## Make a Guild Due Immediately
+
+For testing, force one guild to be due:
 
 ```sql
-\q
+UPDATE public.tibia_guild
+SET
+    next_refresh_after_utc = now(),
+    updated_at_utc = now()
+WHERE world = 'Lobera'
+  AND guild_name = 'Black Clover';
 ```
+
+Then trigger the Edge Function with `batch_size: 1`.
 
 ---
 
-## Check Latest Snapshots
+## Check Guild Refresh Status
 
-Run this query against Supabase:
-
-```bash
-set -a
-source .env.supabase
-set +a
-
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
+```sql
 SELECT
-    extracted_at_utc,
-    guild_name,
-    world
-FROM raw_guild_snapshot
-ORDER BY extracted_at_utc DESC
-LIMIT 20;
-"
-```
-
-Expected result:
-
-```text
-One row per successful snapshot extraction.
-```
-
----
-
-## Check Snapshot Frequency
-
-Use this query to inspect time gaps between snapshots:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
-SELECT
-    extracted_at_utc,
-    extracted_at_utc
-        - LAG(extracted_at_utc) OVER (ORDER BY extracted_at_utc) AS time_since_previous_snapshot
-FROM raw_guild_snapshot
-ORDER BY extracted_at_utc DESC;
-"
-```
-
-Use this query to count snapshots by hour:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
-SELECT
-    date_trunc('hour', extracted_at_utc) AS snapshot_hour,
-    COUNT(*) AS snapshot_count
-FROM raw_guild_snapshot
-GROUP BY date_trunc('hour', extracted_at_utc)
-ORDER BY snapshot_hour DESC;
-"
-```
-
-With a 15-minute schedule, the ideal result is up to:
-
-```text
-4 snapshots per hour
-```
-
-GitHub scheduled workflows may be delayed or skipped occasionally, so exact timing may vary.
-
----
-
-## Check Core Table Counts
-
-Run:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
-SELECT 'raw_guild_snapshot' AS table_name, COUNT(*) AS row_count
-FROM raw_guild_snapshot
-
-UNION ALL
-
-SELECT 'guild_member_snapshot' AS table_name, COUNT(*) AS row_count
-FROM guild_member_snapshot
-
-UNION ALL
-
-SELECT 'stg_guild_member_snapshot' AS table_name, COUNT(*) AS row_count
-FROM stg_guild_member_snapshot;
-"
-```
-
-Expected pattern:
-
-```text
-raw_guild_snapshot        = number of data pulls
-guild_member_snapshot     = number of snapshots × members per snapshot
-stg_guild_member_snapshot = same row count as guild_member_snapshot
-```
-
----
-
-## Check Historical Analytics Counts
-
-Run:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
-SELECT
-    'historical_level_changes' AS view_name,
-    COUNT(*) AS row_count
-FROM public.api_historical_character_level_changes
-
-UNION ALL
-
-SELECT
-    'historical_guild_joins',
-    COUNT(*)
-FROM public.api_historical_guild_joins
-
-UNION ALL
-
-SELECT
-    'historical_guild_leaves',
-    COUNT(*)
-FROM public.api_historical_guild_leaves
-
-UNION ALL
-
-SELECT
-    'historical_rank_changes',
-    COUNT(*)
-FROM public.api_historical_rank_changes;
-"
-```
-
----
-
-## Check Snapshot Date Bounds
-
-The frontend date filters depend on this API view:
-
-```text
-public.api_snapshot_date_bounds
-```
-
-Validate it with:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
-SELECT *
-FROM public.api_snapshot_date_bounds;
-"
-```
-
-Expected result:
-
-```text
-min_snapshot_time = earliest available snapshot
-max_snapshot_time = latest available snapshot
-```
-
----
-
-## Check Guild Overview Metrics
-
-The frontend Guild Overview section uses:
-
-```text
-public.api_guild_overview_by_snapshot
-```
-
-Validate it with:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "
-SELECT
-    guild_name,
     world,
-    snapshot_time,
-    number_of_members,
-    max_level,
-    min_level,
-    average_level
-FROM public.api_guild_overview_by_snapshot
-ORDER BY snapshot_time DESC
-LIMIT 10;
-"
+    guild_name,
+    last_refresh_status,
+    last_refresh_started_at_utc,
+    last_refresh_completed_at_utc,
+    next_refresh_after_utc,
+    LEFT(COALESCE(last_refresh_error, ''), 200) AS error_preview
+FROM public.tibia_guild
+WHERE world = 'Lobera'
+ORDER BY updated_at_utc DESC
+LIMIT 30;
 ```
+
+Use this to identify recent failures or stuck guilds.
 
 ---
 
-## Export Historical Data to CSV
-
-Create an exports folder locally:
-
-```bash
-mkdir -p exports
-```
-
-Export all parsed member snapshots:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "\COPY (
-      SELECT *
-      FROM guild_member_snapshot
-      ORDER BY extracted_at_utc DESC
-  ) TO STDOUT WITH CSV HEADER" \
-  > exports/guild_member_snapshot_history.csv
-```
-
-Export raw snapshot history:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  -c "\COPY (
-      SELECT *
-      FROM raw_guild_snapshot
-      ORDER BY extracted_at_utc DESC
-  ) TO STDOUT WITH CSV HEADER" \
-  > exports/raw_guild_snapshot_history.csv
-```
-
-Check the files:
-
-```bash
-ls -lh exports
-head exports/guild_member_snapshot_history.csv
-```
-
-The `exports/` folder is ignored by Git and should not be committed.
-
----
-
-## Apply a New SQL Script to Supabase
-
-Use this pattern for files in `database/init/`:
-
-```bash
-set -a
-source .env.supabase
-set +a
-
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  < database/init/YOUR_SCRIPT.sql
-```
-
-Example:
-
-```bash
-docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" tibia_guild_postgres psql \
-  -h "$POSTGRES_HOST" \
-  -p "$POSTGRES_PORT" \
-  -U "$POSTGRES_USER" \
-  -d "$POSTGRES_DB" \
-  < database/init/010_create_guild_overview_api_view.sql
-```
-
----
-
-## Run the Local Docker Stack
-
-For local development:
-
-```bash
-docker compose up --build
-```
-
-Local URLs:
-
-```text
-Frontend: http://localhost:3000
-Backend:  http://localhost:8000/docs
-Postgres: localhost:5432
-```
-
-Stop the stack:
-
-```bash
-docker compose down
-```
-
-Reset the local database volume:
-
-```bash
-docker compose down -v
-docker compose up --build
-```
-
-Warning: `docker compose down -v` deletes the local PostgreSQL Docker volume.
-
----
-
-## Run the Local Pipeline
-
-Activate the ingestion environment:
-
-```bash
-source ingestion/.venv/bin/activate
-```
-
-Run the local orchestration script:
-
-```bash
-python orchestration/run_pipeline.py
-```
-
-The local pipeline runs:
-
-```text
-Extract latest guild data
-Load latest snapshot into local Postgres
-Refresh staging and analytics views
-Run validation checks
-```
-
----
-
-## Troubleshooting
-
-## GitHub Actions workflow fails
-
-Check:
-
-```text
-GitHub repository
-→ Actions
-→ Scheduled Supabase Ingestion
-→ Failed run
-```
-
-Common causes:
-
-```text
-Missing GitHub secret
-Invalid Supabase password
-Supabase connection issue
-Python dependency issue
-TibiaData API issue
-SQL/table mismatch
-```
-
-## Snapshot count is not increasing
-
-Check:
-
-```text
-1. Did the GitHub Actions workflow run successfully?
-2. Did the load step complete?
-3. Are GitHub secrets correct?
-4. Is Supabase reachable?
-5. Are duplicate snapshot constraints preventing inserts?
-```
-
-Then run:
+## Check for Stuck Running Guilds
 
 ```sql
-SELECT *
-FROM raw_guild_snapshot
-ORDER BY extracted_at_utc DESC
-LIMIT 20;
+SELECT
+    world,
+    guild_name,
+    last_refresh_status,
+    last_refresh_started_at_utc,
+    now() - last_refresh_started_at_utc AS running_duration
+FROM public.tibia_guild
+WHERE last_refresh_status = 'running'
+ORDER BY last_refresh_started_at_utc;
 ```
 
-## Frontend loads but data is missing
-
-Check browser developer tools:
-
-```text
-Chrome
-→ Developer Tools
-→ Console
-→ Network
-```
-
-Common causes:
-
-```text
-Supabase anon key issue
-Missing SELECT grant on public API view
-Incorrect view name in frontend/app.js
-Date filter outside available snapshot range
-Cloudflare Pages has not redeployed latest commit
-Browser cache
-```
-
-## Supabase REST API returns 401 or 403
-
-Confirm the relevant public API view has been granted to `anon`.
-
-Example:
+The Edge Function calls:
 
 ```sql
-GRANT SELECT ON public.api_historical_character_level_changes TO anon;
+public.release_stale_running_guild_refreshes(p_stale_after)
 ```
 
-Grant scripts are stored in:
+to release stale running claims, but this query is useful for manual verification.
+
+---
+
+## Validate Raw Snapshot Freshness
+
+```sql
+SELECT
+    world,
+    guild_name,
+    COUNT(DISTINCT extracted_at_utc) AS snapshot_count,
+    COUNT(*) AS member_snapshot_rows,
+    MAX(extracted_at_utc) AS latest_snapshot
+FROM public.guild_member_snapshot
+WHERE world = 'Lobera'
+GROUP BY
+    world,
+    guild_name
+ORDER BY latest_snapshot DESC
+LIMIT 30;
+```
+
+This confirms whether raw parsed snapshots are being inserted.
+
+---
+
+## Validate Cache Freshness for One Guild
+
+Compare the latest raw snapshot against the latest roster cache.
+
+```sql
+SELECT
+    MAX(extracted_at_utc) AS base_latest_snapshot
+FROM public.guild_member_snapshot
+WHERE world = 'Lobera'
+  AND guild_name = 'Black Clover';
+
+SELECT
+    MAX(latest_snapshot_time) AS cache_latest_snapshot
+FROM analytics.latest_guild_members_api_cache
+WHERE world = 'Lobera'
+  AND guild_name = 'Black Clover';
+```
+
+The two timestamps should match after a successful ingestion and cache refresh.
+
+---
+
+## Compare Raw Roster vs Cached Roster
+
+Use this when the website says a guild refreshed but the roster table looks stale.
+
+```sql
+WITH latest_base_snapshot AS (
+    SELECT
+        MAX(extracted_at_utc) AS latest_snapshot_time
+    FROM public.guild_member_snapshot
+    WHERE world = 'Lobera'
+      AND guild_name = 'Black Clover'
+),
+
+base_roster AS (
+    SELECT
+        s.character_name,
+        s.level AS base_current_level,
+        s.guild_rank AS base_guild_rank,
+        s.extracted_at_utc AS base_latest_snapshot_time
+    FROM public.guild_member_snapshot s
+    JOIN latest_base_snapshot l
+        ON s.extracted_at_utc = l.latest_snapshot_time
+    WHERE s.world = 'Lobera'
+      AND s.guild_name = 'Black Clover'
+),
+
+cache_roster AS (
+    SELECT
+        character_name,
+        current_level AS cache_current_level,
+        guild_rank AS cache_guild_rank,
+        latest_snapshot_time AS cache_latest_snapshot_time
+    FROM analytics.latest_guild_members_api_cache
+    WHERE world = 'Lobera'
+      AND guild_name = 'Black Clover'
+)
+
+SELECT
+    COALESCE(b.character_name, c.character_name) AS character_name,
+    b.base_current_level,
+    c.cache_current_level,
+    b.base_guild_rank,
+    c.cache_guild_rank,
+    b.base_latest_snapshot_time,
+    c.cache_latest_snapshot_time
+FROM base_roster b
+FULL OUTER JOIN cache_roster c
+    ON b.character_name = c.character_name
+WHERE b.base_current_level IS DISTINCT FROM c.cache_current_level
+   OR b.base_guild_rank IS DISTINCT FROM c.cache_guild_rank
+   OR b.base_latest_snapshot_time IS DISTINCT FROM c.cache_latest_snapshot_time
+ORDER BY character_name
+LIMIT 50;
+```
+
+Expected result after a healthy refresh:
 
 ```text
-database/init/
-```
-
-## Local backend works but production does not
-
-The local FastAPI backend is optional and is not used by production.
-
-Production frontend reads from:
-
-```text
-Supabase REST API
-```
-
-not from:
-
-```text
-FastAPI
-```
-
-## `.env.supabase` fails when sourced
-
-If a value contains spaces, quote it.
-
-Correct:
-
-```env
-TIBIA_GUILD_NAME="Black Clover"
-```
-
-Incorrect:
-
-```env
-TIBIA_GUILD_NAME=Black Clover
+0 rows
 ```
 
 ---
 
-## Operational Checklist
+## Manually Refresh Cache for One Guild
 
-Use this checklist after major changes:
+If raw data exists but cache tables are stale:
+
+```sql
+SELECT public.refresh_frontend_analytics_for_guild(
+    'Lobera',
+    'Black Clover'
+);
+```
+
+Then reload the website.
+
+---
+
+## Validate Website API Views
+
+```sql
+SELECT 'api_worlds' AS view_name, COUNT(*) FROM public.api_worlds
+UNION ALL
+SELECT 'api_guilds', COUNT(*) FROM public.api_guilds
+UNION ALL
+SELECT 'api_snapshot_date_bounds_by_guild', COUNT(*) FROM public.api_snapshot_date_bounds_by_guild
+UNION ALL
+SELECT 'api_guild_overview_by_snapshot', COUNT(*) FROM public.api_guild_overview_by_snapshot
+UNION ALL
+SELECT 'api_historical_character_level_changes', COUNT(*) FROM public.api_historical_character_level_changes
+UNION ALL
+SELECT 'api_historical_guild_joins', COUNT(*) FROM public.api_historical_guild_joins
+UNION ALL
+SELECT 'api_historical_guild_leaves', COUNT(*) FROM public.api_historical_guild_leaves
+UNION ALL
+SELECT 'api_historical_rank_changes', COUNT(*) FROM public.api_historical_rank_changes
+UNION ALL
+SELECT 'api_latest_guild_members', COUNT(*) FROM public.api_latest_guild_members;
+```
+
+This confirms the frontend-facing views are populated.
+
+---
+
+## Validate Project-Owned Database Objects
+
+```sql
+SELECT
+    table_schema,
+    table_name,
+    table_type
+FROM information_schema.tables
+WHERE table_schema IN ('public', 'analytics')
+ORDER BY table_schema, table_type, table_name;
+```
+
+Current expected project-owned structure:
+
+- 4 core public tables
+- 7 analytics cache tables
+- 9 public API views
+- no materialized views
+
+Check materialized views:
+
+```sql
+SELECT
+    schemaname,
+    matviewname
+FROM pg_matviews
+WHERE schemaname IN ('public', 'analytics')
+ORDER BY schemaname, matviewname;
+```
+
+Expected:
 
 ```text
-1. Apply new SQL scripts to Supabase if needed.
-2. Validate public API views with psql.
-3. Test frontend locally.
-4. Commit and push code.
-5. Confirm Cloudflare Pages deployment succeeds.
-6. Confirm live site reflects latest changes.
-7. Manually run GitHub Actions ingestion if needed.
-8. Confirm raw_guild_snapshot count increases.
-9. Confirm frontend date filters and tables work.
+0 rows
 ```
+
+---
+
+## Validate Function Inventory
+
+```sql
+SELECT
+    routine_schema,
+    routine_name,
+    routine_type
+FROM information_schema.routines
+WHERE routine_schema IN ('public', 'analytics')
+ORDER BY routine_schema, routine_name;
+```
+
+Expected project functions:
+
+- `apply_snapshot_retention`
+- `claim_due_guild_refresh_batch`
+- `mark_guild_refresh_failure`
+- `mark_guild_refresh_success`
+- `refresh_frontend_analytics_for_guild`
+- `release_stale_running_guild_refreshes`
+
+---
+
+## Common Issues
+
+### Website says refreshed, but tables look stale
+
+Likely cause:
+
+```text
+Raw snapshot inserted, but per-guild cache did not refresh.
+```
+
+Actions:
+
+1. Compare raw latest snapshot vs cache latest snapshot.
+2. Check Edge Function response for frontend cache refresh failures.
+3. Manually call `refresh_frontend_analytics_for_guild`.
+4. Review Edge Function logs.
+
+---
+
+### Edge Function claims zero guilds
+
+Likely cause:
+
+```text
+No guilds are due based on next_refresh_after_utc.
+```
+
+Actions:
+
+1. Check `public.tibia_guild.next_refresh_after_utc`.
+2. Force a guild due for manual testing.
+3. Confirm Cron is still triggering on schedule.
+
+---
+
+### REST API returns statement timeout
+
+This should be rare under the current cache-table architecture.
+
+Possible causes:
+
+- API view was accidentally rewritten to use dynamic historical logic.
+- Cache table indexes are missing.
+- Supabase is under temporary load.
+
+Actions:
+
+1. Confirm public API views point to cache tables.
+2. Validate indexes on cache tables.
+3. Check Supabase logs.
+
+---
+
+## Operational Best Practice
+
+When changing database objects, avoid `CASCADE` during cleanup unless dependencies have been manually reviewed.
+
+Prefer:
+
+```bash
+psql -v ON_ERROR_STOP=1
+```
+
+This ensures SQL scripts stop at the first error and do not leave the schema partially modified.

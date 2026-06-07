@@ -1,286 +1,258 @@
 # Architecture
 
-This document describes the current production architecture for the Tibia Guild Analytics project.
+This document describes the current production architecture for Tibia Guild Analytics.
 
-## Overview
+Tibia Guild Analytics is a serverless-style data engineering project that ingests Tibia guild roster data, stores historical snapshots, computes per-guild analytics caches, exposes curated Supabase REST API views, and serves a static dashboard through Cloudflare Pages.
 
-Tibia Guild Analytics is an end-to-end data engineering project that collects Tibia guild data, stores historical snapshots, models analytics in PostgreSQL, and serves a public dashboard through a static frontend website.
+---
 
-The current production architecture is designed to be low-cost and portfolio-friendly.
+## High-Level Architecture
 
 ```text
-GitHub Actions
+TibiaData API
         ↓
-Python ingestion pipeline
+Supabase Cron
+        ↓
+Supabase Edge Function: refresh-guilds
         ↓
 Supabase Postgres
         ↓
-Supabase REST API
+Raw and parsed snapshot tables
         ↓
-Cloudflare Pages frontend
+Per-guild analytics cache tables
+        ↓
+Public Supabase REST API views
+        ↓
+Cloudflare Pages static frontend
 ```
 
-## Production Architecture
+The production system does not require an always-running application server. The frontend is static and reads from Supabase REST API views. The ingestion workload is handled by a Supabase Edge Function triggered by Supabase Cron.
 
-```text
-GitHub Repository
-        |
-        | scheduled workflow
-        v
-GitHub Actions
-        |
-        | runs Python extraction/loading
-        v
-Python Ingestion Pipeline
-        |
-        | inserts raw and parsed snapshots
-        v
-Supabase Postgres
-        |
-        | exposes curated public views
-        v
-Supabase REST API
-        |
-        | browser requests
-        v
-Cloudflare Pages Frontend
-```
+---
 
-## Main Components
+## Production Components
 
-| Component | Technology | Purpose |
+| Component | Technology | Responsibility |
 |---|---|---|
-| Data source | TibiaData API | Provides guild and character data |
-| Ingestion | Python | Extracts guild data and loads snapshots |
-| Database | Supabase Postgres | Stores raw and parsed historical data |
-| Transformations | SQL views | Creates staging, analytics, and API-facing views |
-| Scheduler | GitHub Actions | Runs ingestion automatically every 15 minutes |
-| API layer | Supabase REST API | Exposes selected public views to the frontend |
-| Frontend | HTML, CSS, JavaScript | Displays guild analytics dashboard |
-| Hosting | Cloudflare Pages | Hosts the public static website |
-| Domain | Cloudflare Registrar/DNS | Manages the custom project domain |
+| Source API | TibiaData API | Provides current guild roster payloads |
+| Scheduler | Supabase Cron | Triggers recurring ingestion runs |
+| Ingestion worker | Supabase Edge Function | Claims due guilds, calls TibiaData, writes snapshots, refreshes caches |
+| Database | Supabase Postgres | Stores raw snapshots, parsed history, metadata, and analytics caches |
+| API layer | Supabase REST over public views | Serves curated, frontend-ready datasets |
+| Frontend | Static HTML/CSS/JavaScript | Renders the public dashboard |
+| Hosting | Cloudflare Pages | Hosts the static website |
+| DNS | Cloudflare | Routes custom domain traffic |
 
-## Data Flow
+---
 
-### 1. Scheduled Ingestion
+## Current Data Flow
 
-GitHub Actions runs the ingestion workflow on a schedule.
+### 1. Supabase Cron triggers ingestion
 
-Workflow file:
-
-```text
-.github/workflows/scheduled_ingestion.yml
-```
-
-Current cadence:
+Supabase Cron calls the deployed Edge Function:
 
 ```text
-Every 15 minutes
+/functions/v1/refresh-guilds
 ```
 
-The workflow:
+The request includes:
 
-1. Checks out the repository.
-2. Sets up Python.
-3. Installs lightweight ingestion dependencies.
-4. Runs the extraction script.
-5. Loads the latest snapshot into Supabase Postgres.
+```json
+{
+  "world": "Lobera",
+  "batch_size": 50
+}
+```
 
-### 2. Data Extraction
+The function is protected with an `x-cron-secret` header. This avoids exposing the ingestion endpoint publicly without authorization.
 
-The Python ingestion layer extracts guild data from TibiaData.
+---
 
-Main ingestion files:
+### 2. The Edge Function claims due guilds
+
+The function calls:
+
+```sql
+public.claim_due_guild_refresh_batch(p_world, p_batch_size)
+```
+
+This function selects guilds that are due for refresh and marks them as running. This prevents overlapping workers from refreshing the same guild at the same time.
+
+The refresh queue is stored in:
 
 ```text
-ingestion/src/main.py
-ingestion/src/extract_guild.py
-ingestion/src/extract_characters.py
-ingestion/src/tibiadata_client.py
-ingestion/src/load_postgres.py
+public.tibia_guild
 ```
 
-The extraction process writes raw data locally during execution, then the loader persists the data to Supabase Postgres.
+Important queue/status columns include:
 
-### 3. Database Storage
+- `last_refresh_status`
+- `last_refresh_started_at_utc`
+- `last_refresh_completed_at_utc`
+- `next_refresh_after_utc`
+- `last_refresh_error`
 
-Supabase Postgres stores two main persistence layers:
+---
+
+### 3. The Edge Function fetches guild data
+
+For each claimed guild, the Edge Function calls the TibiaData guild endpoint and receives the latest guild roster.
+
+The full payload is stored in:
 
 ```text
-raw_guild_snapshot
-guild_member_snapshot
+public.raw_guild_snapshot
 ```
 
-`raw_guild_snapshot` stores one row per extraction run.
+This preserves the raw API response for lineage, debugging, and future reprocessing.
 
-`guild_member_snapshot` stores one row per guild member per extraction run.
+---
 
-This structure allows the project to track historical changes over time.
+### 4. Parsed member rows are inserted
 
-### 4. SQL Modeling
-
-The database contains SQL views for:
+The Edge Function parses member-level fields into:
 
 ```text
-staging
-analytics
-public API access
+public.guild_member_snapshot
 ```
 
-The staging views standardize and clean fields.
+This table stores one row per character per guild snapshot.
 
-The analytics views compare snapshots and calculate guild activity.
+Typical fields include:
 
-The public API views expose curated read-only results for the frontend through Supabase REST.
+- `snapshot_id`
+- `extracted_at_utc`
+- `guild_name`
+- `world`
+- `character_name`
+- `guild_rank`
+- `vocation`
+- `level`
+- `status`
+- `joined`
 
-### 5. Public API Access
+This table is the historical fact table for the project.
 
-The production frontend does not use a custom backend server.
+---
 
-Instead, it reads from Supabase REST API endpoints that are backed by public API views.
+### 5. Per-guild analytics cache refresh
 
-Example API-facing views:
+After a guild is successfully ingested, the Edge Function calls:
 
-```text
-public.api_guild_overview_by_snapshot
-public.api_historical_character_level_changes
-public.api_historical_guild_joins
-public.api_historical_guild_leaves
-public.api_historical_rank_changes
-public.api_snapshot_date_bounds
+```sql
+public.refresh_frontend_analytics_for_guild(p_world, p_guild_name)
 ```
 
-Only curated read-only views are exposed to the frontend.
+This function rebuilds analytics cache rows only for the refreshed guild.
 
-The raw tables are not intended for direct public frontend access.
+That function populates:
 
-### 6. Frontend Hosting
+- `analytics.snapshot_pairs_api_cache`
+- `analytics.character_estimated_online_minutes_cache`
+- `analytics.character_level_changes_with_online_cache`
+- `analytics.guild_joins_api_cache`
+- `analytics.guild_leaves_api_cache`
+- `analytics.rank_changes_api_cache`
+- `analytics.latest_guild_members_api_cache`
 
-The frontend is a static website built with:
+This is the key performance design in the current architecture.
 
-```text
-HTML
-CSS
-JavaScript
-```
+---
 
-Frontend files:
+## Why Per-Guild Cache Tables Are Used
 
-```text
-frontend/index.html
-frontend/styles.css
-frontend/app.js
-frontend/config.js
-```
+Earlier versions of the project used dynamic analytics views and then global materialized views. That worked at smaller scale, but as snapshot volume increased, dashboard queries and global refreshes became too expensive.
 
-Cloudflare Pages deploys the frontend from the `frontend/` folder and automatically redeploys after pushes to the main branch.
+The current design uses per-guild cache tables because the ingestion worker refreshes one batch of guilds at a time. After a guild is ingested, only that guild’s analytics need to be rebuilt.
 
-## Production URLs
+This provides three benefits:
 
-Primary Cloudflare Pages URL:
+1. **Fast frontend reads**  
+   The dashboard reads from precomputed cache tables through public API views.
 
-```text
-https://tibia-guild-analytics.pages.dev/
-```
+2. **Smaller refresh workload**  
+   Refreshing one guild is significantly cheaper than recomputing analytics for every guild.
 
-Custom domain:
+3. **Better operational isolation**  
+   A refresh problem with one guild does not require rebuilding the entire analytics layer.
 
-```text
-https://tibiaguildanalytics.com/
-```
+---
 
-## Why This Architecture
+## Public API Views
 
-The project originally explored a more traditional backend API architecture with FastAPI. That backend still exists in the repository for local development and architecture exploration.
+The frontend reads only from public API views:
 
-However, the production version uses Supabase REST API directly because it reduces cost and complexity.
-
-This avoids the need for:
-
-```text
-Always-running backend server
-Managed application hosting
-Dedicated API infrastructure
-```
-
-The resulting production system is:
-
-```text
-Low cost
-Simple to operate
-Easy to deploy
-Appropriate for a portfolio project
-```
-
-## Local Development Architecture
-
-For local development, the project can also run with Docker Compose.
-
-```text
-Docker Compose
-        ↓
-Local Postgres
-FastAPI backend
-Static frontend
-```
-
-Local URLs:
-
-```text
-Frontend: http://localhost:3000
-Backend:  http://localhost:8000/docs
-Postgres: localhost:5432
-```
-
-The local FastAPI backend is optional and is not required for the production deployment.
-
-## Environment Strategy
-
-Local development uses `.env`.
-
-Supabase testing can use `.env.supabase`.
-
-Production secrets are stored in GitHub repository secrets.
-
-Important production secrets include:
-
-```text
-SUPABASE_DB_HOST
-SUPABASE_DB_PORT
-SUPABASE_DB_NAME
-SUPABASE_DB_USER
-SUPABASE_DB_PASSWORD
-TIBIA_GUILD_NAME
-TIBIA_WORLD
-```
-
-Environment files containing real credentials are not committed to GitHub.
-
-## Cost Profile
-
-The current production architecture is designed to keep operating costs near zero.
-
-| Component | Cost expectation |
+| View | Purpose |
 |---|---|
-| Cloudflare Pages | Free tier |
-| GitHub Actions scheduled ingestion | Free tier for this usage level |
-| Supabase Postgres | Free tier initially |
-| Supabase REST API | Included with Supabase |
-| Custom domain | Annual domain registration cost |
+| `public.api_worlds` | World selector |
+| `public.api_guilds` | Guild selector |
+| `public.api_snapshot_date_bounds_by_guild` | Date filter bounds |
+| `public.api_guild_overview_by_snapshot` | Guild overview metrics |
+| `public.api_historical_character_level_changes` | Level changes and time online |
+| `public.api_historical_guild_joins` | Guild join events |
+| `public.api_historical_guild_leaves` | Guild leave events |
+| `public.api_historical_rank_changes` | Rank change events |
+| `public.api_latest_guild_members` | Latest roster and last-connected estimate |
 
-The main recurring paid cost is the optional custom domain.
+The frontend does not query raw tables directly. Public API views provide a stable contract between the database and the UI.
 
-## Future Architecture Improvements
+---
 
-Potential future improvements include:
+## Frontend Architecture
+
+The frontend is a static application in:
 
 ```text
-Support multiple guilds and worlds
-Add a guild/world selector to the frontend
-Add richer historical trend charts
-Add automated validation checks to GitHub Actions
-Add alerting for failed ingestion runs
-Add monitoring for stale snapshots
-Move production secrets to a dedicated secrets manager if needed
-Reintroduce a backend API if business logic becomes more complex
+frontend/
 ```
+
+It uses:
+
+- `index.html` for layout
+- `styles.css` for visual styling
+- `app.js` for data fetching, state management, sorting, filtering, and rendering
+- `config.js` for runtime Supabase configuration
+
+The dashboard contains:
+
+- Guild Overview
+- Analysis by Vocation
+- Level Changes and Time Online
+- Guild Joins / Leaves
+- Rank Changes
+- Guild Members
+
+The Guild Overview remains visible at the top. Analytical sections are organized into tabs below the overview.
+
+---
+
+## Legacy Components
+
+The repository keeps earlier architecture components in:
+
+```text
+archive/
+```
+
+Examples:
+
+- `archive/legacy_backend`: earlier FastAPI backend
+- `archive/legacy_orchestration`: earlier local orchestration runner
+
+These are retained for project history and learning context but are not part of production.
+
+---
+
+## Current Production Pattern
+
+The final architecture is best described as:
+
+```text
+scheduled serverless ingestion
++ Postgres historical fact storage
++ per-guild analytics cache refresh
++ public SQL API views
++ static frontend
+```
+
+This is a professional, cost-conscious pattern for a small analytics product that still demonstrates production data engineering concepts.
