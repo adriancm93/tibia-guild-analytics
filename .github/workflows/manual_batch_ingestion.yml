@@ -1,12 +1,12 @@
-name: Scheduled Supabase Batch Guild Ingestion
+name: Manual Supabase Batch Guild Ingestion
 
 on:
   workflow_dispatch:
 
 concurrency:
-  group: scheduled-supabase-batch-guild-ingestion
+  group: manual-supabase-batch-guild-ingestion
   cancel-in-progress: false
-  
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   RAW_DATA_DIR: data/raw
@@ -14,7 +14,7 @@ env:
 
 jobs:
   run-batch-guild-ingestion:
-    name: Run batch guild ingestion
+    name: Run manual batch guild ingestion
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +46,7 @@ jobs:
           test -n "$POSTGRES_PASSWORD"
           echo "Environment configuration found."
 
-      - name: Run batch guild ingestion
+      - name: Run manual batch guild ingestion
         env:
           POSTGRES_HOST: ${{ secrets.SUPABASE_DB_HOST }}
           POSTGRES_PORT: ${{ secrets.SUPABASE_DB_PORT }}
