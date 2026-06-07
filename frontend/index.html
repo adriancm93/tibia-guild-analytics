@@ -6,23 +6,24 @@
     <title>Tibia Guild Analytics</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
     <header class="site-header">
         <div>
             <p class="eyebrow">Statistics for every Tibia guild</p>
             <h1>Tibia Guild Analytics</h1>
-            <!-- <p class="subtitle">
-                Snapshot-based analytics for guild movement, level progression, joins, leaves, and rank changes.
-            </p>-->
         </div>
     </header>
 
     <main class="page-container">
-        <section class="table-section selector-section">
+        <!-- ==================================================
+             Guild selector
+        =================================================== -->
+        <section class="table-section selector-section" aria-labelledby="guild-selector-heading">
             <div class="section-header">
                 <div>
                     <p class="eyebrow">Guild Selection</p>
-                    <h2>Select World and Guild</h2>
+                    <h2 id="guild-selector-heading">Select World and Guild</h2>
                     <p>Choose a world, then select one of the available guilds.</p>
                 </div>
 
@@ -37,11 +38,15 @@
                         <select id="guild-select"></select>
                     </label>
 
-                    <button id="apply-guild-selection">Apply</button>
+                    <button id="apply-guild-selection" type="button">Apply</button>
                 </div>
             </div>
         </section>
-        <section class="guild-overview-section table-section">
+
+        <!-- ==================================================
+             Guild overview
+        =================================================== -->
+        <section class="guild-overview-section table-section" aria-labelledby="overview-guild-name">
             <div class="section-header">
                 <div>
                     <p class="eyebrow">Guild Overview</p>
@@ -59,14 +64,17 @@
                     <p class="card-label">Number of Members</p>
                     <p id="overview-member-count" class="metric-value">0</p>
                 </div>
+
                 <div class="card metric-card">
                     <p class="card-label">Max Level</p>
                     <p id="overview-max-level" class="metric-value">0</p>
                 </div>
+
                 <div class="card metric-card">
                     <p class="card-label">Min Level</p>
                     <p id="overview-min-level" class="metric-value">0</p>
                 </div>
+
                 <div class="card metric-card">
                     <p class="card-label">Average Level</p>
                     <p id="overview-average-level" class="metric-value">0</p>
@@ -74,37 +82,62 @@
             </div>
         </section>
 
-
+        <!-- ==================================================
+             Dashboard navigation
+        =================================================== -->
         <nav class="dashboard-tabs" aria-label="Dashboard sections">
-            <button class="dashboard-tab active" type="button" data-tab-target="analysis-vocation-section">
+            <button
+                class="dashboard-tab active"
+                type="button"
+                data-tab-target="analysis-vocation-section"
+            >
                 Analysis by Vocation
             </button>
 
-            <button class="dashboard-tab" type="button" data-tab-target="level-changes-section">
+            <button
+                class="dashboard-tab"
+                type="button"
+                data-tab-target="level-changes-section"
+            >
                 Level Changes and Time Online
             </button>
 
-            <button class="dashboard-tab" type="button" data-tab-target="guild-movement-section">
+            <button
+                class="dashboard-tab"
+                type="button"
+                data-tab-target="guild-movement-section"
+            >
                 Guild Joins / Leaves
             </button>
 
-            <button class="dashboard-tab" type="button" data-tab-target="rank-changes-section">
+            <button
+                class="dashboard-tab"
+                type="button"
+                data-tab-target="rank-changes-section"
+            >
                 Rank Changes
             </button>
 
-            <button class="dashboard-tab" type="button" data-tab-target="guild-members-section">
+            <button
+                class="dashboard-tab"
+                type="button"
+                data-tab-target="guild-members-section"
+            >
                 Guild Members
             </button>
         </nav>
 
-
-
-
-
-        <section id="analysis-vocation-section" class="dashboard-card dashboard-tab-section active">
+        <!-- ==================================================
+             Analysis by vocation
+        =================================================== -->
+        <section
+            id="analysis-vocation-section"
+            class="dashboard-card dashboard-tab-section active"
+            aria-labelledby="analysis-vocation-heading"
+        >
             <div class="section-header">
                 <div>
-                    <h2>Analysis by Vocation</h2>
+                    <h2 id="analysis-vocation-heading">Analysis by Vocation</h2>
                     <p>Current guild roster distribution by base vocation within the selected level range.</p>
                 </div>
 
@@ -125,7 +158,12 @@
 
             <div class="vocation-analysis-grid">
                 <div class="vocation-chart-card">
-                    <canvas id="vocation-pie-chart" width="360" height="360"></canvas>
+                    <canvas
+                        id="vocation-pie-chart"
+                        width="360"
+                        height="360"
+                        aria-label="Vocation distribution pie chart"
+                    ></canvas>
                     <div id="vocation-chart-legend" class="vocation-chart-legend"></div>
                 </div>
 
@@ -133,10 +171,19 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="sortable" data-table="vocationAnalysis" data-sort-key="character_name">
+                                <th
+                                    class="sortable"
+                                    data-table="vocationAnalysis"
+                                    data-sort-key="character_name"
+                                >
                                     Character
                                 </th>
-                                <th class="sortable filterable-header" data-table="vocationAnalysis" data-sort-key="base_vocation">
+
+                                <th
+                                    class="sortable filterable-header"
+                                    data-table="vocationAnalysis"
+                                    data-sort-key="base_vocation"
+                                >
                                     <span>Vocation</span>
                                     <button
                                         type="button"
@@ -146,35 +193,49 @@
                                     >
                                         🔍
                                     </button>
+
                                     <div class="column-filter-menu" id="vocation-analysis-filter-menu">
                                         <label class="checkbox-filter-option">
                                             <input type="checkbox" value="Monk" checked />
                                             Monk
                                         </label>
+
                                         <label class="checkbox-filter-option">
                                             <input type="checkbox" value="Knight" checked />
                                             Knight
                                         </label>
+
                                         <label class="checkbox-filter-option">
                                             <input type="checkbox" value="Paladin" checked />
                                             Paladin
                                         </label>
+
                                         <label class="checkbox-filter-option">
                                             <input type="checkbox" value="Druid" checked />
                                             Druid
                                         </label>
+
                                         <label class="checkbox-filter-option">
                                             <input type="checkbox" value="Sorcerer" checked />
                                             Sorcerer
                                         </label>
-                                        <button type="button" id="clear-vocation-analysis-filter">Select All</button>
+
+                                        <button type="button" id="clear-vocation-analysis-filter">
+                                            Select All
+                                        </button>
                                     </div>
                                 </th>
-                                <th class="sortable" data-table="vocationAnalysis" data-sort-key="current_level">
+
+                                <th
+                                    class="sortable"
+                                    data-table="vocationAnalysis"
+                                    data-sort-key="current_level"
+                                >
                                     Level
                                 </th>
                             </tr>
                         </thead>
+
                         <tbody id="vocation-analysis-table">
                             <tr>
                                 <td colspan="3">Loading vocation analysis...</td>
@@ -185,22 +246,32 @@
             </div>
         </section>
 
-        <section id="level-changes-section" class="dashboard-card dashboard-tab-section">
+        <!-- ==================================================
+             Level changes and time online
+        =================================================== -->
+        <section
+            id="level-changes-section"
+            class="dashboard-card dashboard-tab-section"
+            aria-labelledby="level-changes-heading"
+        >
             <div class="section-header">
                 <div>
-                    <h2>Level Changes and Time Online</h2>
+                    <h2 id="level-changes-heading">Level Changes and Time Online</h2>
                     <p>Characters whose level changed within the selected snapshot date range.</p>
                 </div>
+
                 <div class="date-filter">
                     <label>
                         From
                         <input type="date" id="level-start-date" />
                     </label>
+
                     <label>
                         To
                         <input type="date" id="level-end-date" />
                     </label>
-                    <button id="apply-level-filter">Apply</button>
+
+                    <button id="apply-level-filter" type="button">Apply</button>
                 </div>
             </div>
 
@@ -208,7 +279,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="sortable filterable-header" data-table="level" data-sort-key="character_name">
+                            <th
+                                class="sortable filterable-header"
+                                data-table="level"
+                                data-sort-key="character_name"
+                            >
                                 <span>Character</span>
                                 <button
                                     type="button"
@@ -218,23 +293,45 @@
                                 >
                                     🔍
                                 </button>
+
                                 <div class="column-filter-menu" id="level-character-filter-menu">
                                     <input
                                         id="level-character-filter"
                                         type="search"
                                         placeholder="Search character..."
                                     />
-                                    <button type="button" id="clear-level-character-filter">Clear</button>
+                                    <button type="button" id="clear-level-character-filter">
+                                        Clear
+                                    </button>
                                 </div>
                             </th>
-                            <th class="sortable" data-table="level" data-sort-key="vocation">Vocation</th>
-                            <th class="sortable" data-table="level" data-sort-key="guild_rank">Guild Rank</th>
-                            <th class="sortable" data-table="level" data-sort-key="previous_level">Previous Level</th>
-                            <th class="sortable" data-table="level" data-sort-key="current_level">Current Level</th> 
-                            <th class="sortable" data-table="level" data-sort-key="level_gain">Level Gain</th>
-                            <th class="sortable" data-table="level" data-sort-key="estimated_online_minutes">Time Online</th>
+
+                            <th class="sortable" data-table="level" data-sort-key="vocation">
+                                Vocation
+                            </th>
+
+                            <th class="sortable" data-table="level" data-sort-key="guild_rank">
+                                Guild Rank
+                            </th>
+
+                            <th class="sortable" data-table="level" data-sort-key="previous_level">
+                                Previous Level
+                            </th>
+
+                            <th class="sortable" data-table="level" data-sort-key="current_level">
+                                Current Level
+                            </th>
+
+                            <th class="sortable" data-table="level" data-sort-key="level_gain">
+                                Level Gain
+                            </th>
+
+                            <th class="sortable" data-table="level" data-sort-key="estimated_online_minutes">
+                                Time Online
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody id="level-changes-table">
                         <tr>
                             <td colspan="7">Loading level changes and time online...</td>
@@ -244,11 +341,14 @@
             </div>
         </section>
 
+        <!-- ==================================================
+             Guild joins and leaves
+        =================================================== -->
         <div id="guild-movement-section" class="dashboard-tab-section">
-            <section class="table-section">
+            <section class="table-section" aria-labelledby="guild-joins-heading">
                 <div class="section-header">
                     <div>
-                        <h2>Guild Joins</h2>
+                        <h2 id="guild-joins-heading">Guild Joins</h2>
                         <p>Characters who joined within the selected snapshot date range.</p>
                     </div>
 
@@ -257,11 +357,13 @@
                             From
                             <input type="date" id="joins-start-date" />
                         </label>
+
                         <label>
                             To
                             <input type="date" id="joins-end-date" />
                         </label>
-                        <button id="apply-joins-filter">Apply</button>
+
+                        <button id="apply-joins-filter" type="button">Apply</button>
                     </div>
                 </div>
 
@@ -269,13 +371,28 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="sortable" data-table="joins" data-sort-key="character_name">Character</th>
-                                <th class="sortable" data-table="joins" data-sort-key="vocation">Vocation</th>
-                                <th class="sortable" data-table="joins" data-sort-key="level">Level</th>
-                                <th class="sortable" data-table="joins" data-sort-key="guild_rank">Guild Rank</th>
-                                <th class="sortable" data-table="joins" data-sort-key="latest_snapshot_time">Join Date</th>
+                                <th class="sortable" data-table="joins" data-sort-key="character_name">
+                                    Character
+                                </th>
+
+                                <th class="sortable" data-table="joins" data-sort-key="vocation">
+                                    Vocation
+                                </th>
+
+                                <th class="sortable" data-table="joins" data-sort-key="level">
+                                    Level
+                                </th>
+
+                                <th class="sortable" data-table="joins" data-sort-key="guild_rank">
+                                    Guild Rank
+                                </th>
+
+                                <th class="sortable" data-table="joins" data-sort-key="latest_snapshot_time">
+                                    Join Date
+                                </th>
                             </tr>
                         </thead>
+
                         <tbody id="guild-joins-table">
                             <tr>
                                 <td colspan="5">Loading guild joins...</td>
@@ -285,10 +402,10 @@
                 </div>
             </section>
 
-            <section class="table-section">
+            <section class="table-section" aria-labelledby="guild-leaves-heading">
                 <div class="section-header">
                     <div>
-                        <h2>Guild Leaves</h2>
+                        <h2 id="guild-leaves-heading">Guild Leaves</h2>
                         <p>Characters who left within the selected snapshot date range.</p>
                     </div>
 
@@ -297,11 +414,13 @@
                             From
                             <input type="date" id="leaves-start-date" />
                         </label>
+
                         <label>
                             To
                             <input type="date" id="leaves-end-date" />
                         </label>
-                        <button id="apply-leaves-filter">Apply</button>
+
+                        <button id="apply-leaves-filter" type="button">Apply</button>
                     </div>
                 </div>
 
@@ -309,13 +428,28 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="sortable" data-table="leaves" data-sort-key="character_name">Character</th>
-                                <th class="sortable" data-table="leaves" data-sort-key="vocation">Vocation</th>
-                                <th class="sortable" data-table="leaves" data-sort-key="level">Level</th>
-                                <th class="sortable" data-table="leaves" data-sort-key="guild_rank">Guild Rank</th>
-                                <th class="sortable" data-table="leaves" data-sort-key="latest_snapshot_time">Leave Date</th>
+                                <th class="sortable" data-table="leaves" data-sort-key="character_name">
+                                    Character
+                                </th>
+
+                                <th class="sortable" data-table="leaves" data-sort-key="vocation">
+                                    Vocation
+                                </th>
+
+                                <th class="sortable" data-table="leaves" data-sort-key="level">
+                                    Level
+                                </th>
+
+                                <th class="sortable" data-table="leaves" data-sort-key="guild_rank">
+                                    Guild Rank
+                                </th>
+
+                                <th class="sortable" data-table="leaves" data-sort-key="latest_snapshot_time">
+                                    Leave Date
+                                </th>
                             </tr>
                         </thead>
+
                         <tbody id="guild-leaves-table">
                             <tr>
                                 <td colspan="5">Loading guild leaves...</td>
@@ -325,10 +459,18 @@
                 </div>
             </section>
         </div>
-       <section id="rank-changes-section" class="dashboard-card dashboard-tab-section">
+
+        <!-- ==================================================
+             Rank changes
+        =================================================== -->
+        <section
+            id="rank-changes-section"
+            class="dashboard-card dashboard-tab-section"
+            aria-labelledby="rank-changes-heading"
+        >
             <div class="section-header">
                 <div>
-                    <h2>Rank Changes</h2>
+                    <h2 id="rank-changes-heading">Rank Changes</h2>
                     <p>Characters whose guild rank changed within the selected snapshot date range.</p>
                 </div>
 
@@ -337,11 +479,13 @@
                         From
                         <input type="date" id="rank-start-date" />
                     </label>
+
                     <label>
                         To
                         <input type="date" id="rank-end-date" />
                     </label>
-                    <button id="apply-rank-filter">Apply</button>
+
+                    <button id="apply-rank-filter" type="button">Apply</button>
                 </div>
             </div>
 
@@ -349,12 +493,24 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="sortable" data-table="rank" data-sort-key="character_name">Character</th>
-                            <th class="sortable" data-table="rank" data-sort-key="previous_guild_rank">Previous Rank</th>
-                            <th class="sortable" data-table="rank" data-sort-key="current_guild_rank">Current Rank</th>
-                            <th class="sortable" data-table="rank" data-sort-key="latest_snapshot_time">Rank Change Date</th>
+                            <th class="sortable" data-table="rank" data-sort-key="character_name">
+                                Character
+                            </th>
+
+                            <th class="sortable" data-table="rank" data-sort-key="previous_guild_rank">
+                                Previous Rank
+                            </th>
+
+                            <th class="sortable" data-table="rank" data-sort-key="current_guild_rank">
+                                Current Rank
+                            </th>
+
+                            <th class="sortable" data-table="rank" data-sort-key="latest_snapshot_time">
+                                Rank Change Date
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody id="rank-changes-table">
                         <tr>
                             <td colspan="4">Loading rank changes...</td>
@@ -364,10 +520,17 @@
             </div>
         </section>
 
-        <section id="guild-members-section" class="dashboard-card dashboard-tab-section">
+        <!-- ==================================================
+             Guild members
+        =================================================== -->
+        <section
+            id="guild-members-section"
+            class="dashboard-card dashboard-tab-section"
+            aria-labelledby="guild-members-heading"
+        >
             <div class="section-header">
                 <div>
-                    <h2>Guild Members</h2>
+                    <h2 id="guild-members-heading">Guild Members</h2>
                     <p>Current guild roster from the latest available snapshot.</p>
                 </div>
             </div>
@@ -376,7 +539,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="sortable filterable-header" data-table="members" data-sort-key="character_name">
+                            <th
+                                class="sortable filterable-header"
+                                data-table="members"
+                                data-sort-key="character_name"
+                            >
                                 <span>Character</span>
                                 <button
                                     type="button"
@@ -386,21 +553,37 @@
                                 >
                                     🔍
                                 </button>
+
                                 <div class="column-filter-menu" id="members-character-filter-menu">
                                     <input
                                         id="members-character-filter"
                                         type="search"
                                         placeholder="Search character..."
                                     />
-                                    <button type="button" id="clear-members-character-filter">Clear</button>
+                                    <button type="button" id="clear-members-character-filter">
+                                        Clear
+                                    </button>
                                 </div>
                             </th>
-                            <th class="sortable" data-table="members" data-sort-key="vocation">Vocation</th>
-                            <th class="sortable" data-table="members" data-sort-key="guild_rank">Guild Rank</th>
-                            <th class="sortable" data-table="members" data-sort-key="current_level">Current Level</th>
-                            <th class="sortable" data-table="members" data-sort-key="last_connected_at">Last Connected</th>
+
+                            <th class="sortable" data-table="members" data-sort-key="vocation">
+                                Vocation
+                            </th>
+
+                            <th class="sortable" data-table="members" data-sort-key="guild_rank">
+                                Guild Rank
+                            </th>
+
+                            <th class="sortable" data-table="members" data-sort-key="current_level">
+                                Current Level
+                            </th>
+
+                            <th class="sortable" data-table="members" data-sort-key="last_connected_at">
+                                Last Connected
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody id="guild-members-table">
                         <tr>
                             <td colspan="5">Loading guild members...</td>
@@ -409,13 +592,10 @@
                 </table>
             </div>
         </section>
-
     </main>
 
     <footer class="site-footer">
-        <p>
-            Data is based on the latest available guild snapshots.
-        </p>
+        <p>Data is based on the latest available guild snapshots.</p>
     </footer>
 
     <script src="config.js"></script>

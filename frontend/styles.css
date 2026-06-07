@@ -10,6 +10,10 @@
     --danger: #ef4444;
 }
 
+/* ============================================================
+   Base layout
+============================================================ */
+
 * {
     box-sizing: border-box;
 }
@@ -23,6 +27,33 @@ body {
     color: var(--text);
 }
 
+section {
+    margin-bottom: 32px;
+}
+
+h2 {
+    margin: 0 0 16px;
+    font-size: 24px;
+}
+
+button {
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 18px;
+    background: var(--accent);
+    color: #052e16;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(1.08);
+}
+
+/* ============================================================
+   Site shell
+============================================================ */
+
 .site-header {
     padding: 48px 32px;
     border-bottom: 1px solid var(--border);
@@ -34,6 +65,30 @@ body {
     font-size: 42px;
     line-height: 1.1;
 }
+
+.page-container {
+    width: min(1200px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 32px 0 64px;
+}
+
+.site-footer {
+    width: min(1200px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 0 0 40px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.site-footer p {
+    margin: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+}
+
+/* ============================================================
+   Typography helpers
+============================================================ */
 
 .eyebrow {
     margin: 0 0 12px;
@@ -51,54 +106,29 @@ body {
     line-height: 1.6;
 }
 
-.page-container {
-    width: min(1200px, calc(100% - 32px));
-    margin: 0 auto;
-    padding: 32px 0 64px;
+.error {
+    color: var(--danger);
 }
 
-section {
-    margin-bottom: 32px;
+.success,
+.positive,
+.level-gain {
+    color: var(--accent);
 }
 
-h2 {
-    margin: 0 0 16px;
-    font-size: 24px;
+.positive,
+.negative,
+.level-gain {
+    font-weight: 800;
 }
 
-.selector-section {
-    padding: 24px;
+.negative {
+    color: #f87171;
 }
 
-.guild-selector {
-    display: flex;
-    align-items: end;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.guild-selector label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.guild-selector select {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    background: var(--panel-light);
-    color: var(--text);
-    min-width: 220px;
-}
-
-.guild-selector select:focus {
-    outline: 2px solid var(--accent-soft);
-    border-color: var(--accent);
-}
+/* ============================================================
+   Cards and sections
+============================================================ */
 
 .status-card,
 .card,
@@ -109,31 +139,17 @@ h2 {
     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
 }
 
-.status-card {
+.status-card,
+.card,
+.table-section,
+.guild-overview-section,
+.selector-section {
     padding: 24px;
 }
 
 .status-card p {
     margin: 0;
     color: var(--muted);
-}
-
-.snapshot-grid,
-.summary-grid {
-    display: grid;
-    gap: 16px;
-}
-
-.snapshot-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.summary-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.card {
-    padding: 22px;
 }
 
 .card-label {
@@ -155,9 +171,68 @@ h2 {
     font-weight: 800;
 }
 
-.guild-overview-section {
-    padding: 24px;
+/* ============================================================
+   Section headers
+============================================================ */
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
 }
+
+.section-header p {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* ============================================================
+   Guild selector
+============================================================ */
+
+.guild-selector {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.guild-selector label,
+.date-filter label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.guild-selector select,
+.date-filter input,
+.column-filter-menu input[type="search"] {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel-light);
+    color: var(--text);
+}
+
+.guild-selector select {
+    min-width: 220px;
+    padding: 10px 12px;
+}
+
+.guild-selector select:focus,
+.date-filter input:focus,
+.column-filter-menu input[type="search"]:focus {
+    outline: 2px solid var(--accent-soft);
+    border-color: var(--accent);
+}
+
+/* ============================================================
+   Overview
+============================================================ */
 
 .overview-world {
     margin: 4px 0 10px;
@@ -177,36 +252,89 @@ h2 {
     font-weight: 700;
 }
 
-.table-section {
-    padding: 24px;
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.snapshot-grid,
+.summary-grid {
+    display: grid;
     gap: 16px;
-    margin-bottom: 20px;
 }
 
-.section-header p {
-    margin: 0;
-    color: var(--muted);
+.snapshot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-button {
-    border: 0;
+.summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ============================================================
+   Dashboard tabs
+============================================================ */
+
+.dashboard-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 28px auto 22px;
+    max-width: 1200px;
+    padding: 0 16px;
+}
+
+.dashboard-tab {
+    border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 12px 18px;
-    background: var(--accent);
-    color: #052e16;
-    font-weight: 700;
+    background: var(--panel);
+    color: var(--muted);
+    padding: 10px 16px;
+    font-weight: 800;
     cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 
-button:hover {
-    filter: brightness(1.08);
+.dashboard-tab:hover {
+    border-color: var(--accent);
+    color: var(--text);
 }
+
+.dashboard-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #04120a;
+}
+
+.dashboard-tab-section {
+    display: none;
+}
+
+.dashboard-tab-section.active {
+    display: block;
+}
+
+#guild-movement-section.active {
+    display: block;
+}
+
+#guild-movement-section .dashboard-card + .dashboard-card {
+    margin-top: 24px;
+}
+
+/* ============================================================
+   Date and level filters
+============================================================ */
+
+.date-filter {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.date-filter input {
+    padding: 10px 12px;
+}
+
+/* ============================================================
+   Tables
+============================================================ */
 
 .table-wrapper {
     overflow-x: auto;
@@ -235,57 +363,6 @@ td {
     color: var(--text);
 }
 
-.level-gain {
-    color: var(--accent);
-    font-weight: 700;
-}
-
-.error {
-    color: var(--danger);
-}
-
-.success {
-    color: var(--accent);
-}
-
-@media (max-width: 850px) {
-    .snapshot-grid,
-    .summary-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .site-header h1 {
-        font-size: 32px;
-    }
-
-    .section-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .date-filter {
-        width: 100%;
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .date-filter button,
-    .date-filter input {
-        width: 100%;
-    }
-    .guild-selector {
-        width: 100%;
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .guild-selector button,
-    .guild-selector select {
-        width: 100%;
-    }
-}
-
-
 .level-changes-scroll,
 .guild-members-scroll {
     height: 520px;
@@ -295,7 +372,8 @@ td {
 }
 
 .level-changes-scroll thead th,
-.guild-members-scroll thead th {
+.guild-members-scroll thead th,
+.vocation-table-scroll thead th {
     position: sticky;
     top: 0;
     background: var(--panel);
@@ -303,9 +381,14 @@ td {
 }
 
 .level-changes-scroll table,
-.guild-members-scroll table {
+.guild-members-scroll table,
+.vocation-table-scroll table {
     width: 100%;
 }
+
+/* ============================================================
+   Sortable table headers
+============================================================ */
 
 .sortable {
     cursor: pointer;
@@ -332,58 +415,9 @@ td {
     color: var(--accent);
 }
 
-.date-filter {
-    display: flex;
-    align-items: end;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.date-filter label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.date-filter input {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    background: var(--panel-light);
-    color: var(--text);
-}
-
-.date-filter input:focus {
-    outline: 2px solid var(--accent-soft);
-    border-color: var(--accent);
-}
-
-.site-footer {
-    width: min(1200px, calc(100% - 32px));
-    margin: 0 auto;
-    padding: 0 0 40px;
-    color: var(--muted);
-    font-size: 14px;
-}
-
-.site-footer p {
-    margin: 0;
-    border-top: 1px solid var(--border);
-    padding-top: 24px;
-}
-
-.positive {
-    color: var(--accent);
-    font-weight: 800;
-}
-
-.negative {
-    color: #f87171;
-    font-weight: 800;
-}
+/* ============================================================
+   Column filter menus
+============================================================ */
 
 .filterable-header {
     position: relative;
@@ -426,16 +460,7 @@ td {
 }
 
 .column-filter-menu input[type="search"] {
-    border: 1px solid var(--border);
-    border-radius: 10px;
     padding: 9px 10px;
-    background: var(--panel-light);
-    color: var(--text);
-}
-
-.column-filter-menu input[type="search"]:focus {
-    outline: 2px solid var(--accent-soft);
-    border-color: var(--accent);
 }
 
 .column-filter-menu button {
@@ -447,6 +472,23 @@ td {
     font-weight: 800;
     cursor: pointer;
 }
+
+.checkbox-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkbox-filter-option input {
+    accent-color: var(--accent);
+}
+
+/* ============================================================
+   Vocation analysis
+============================================================ */
 
 .vocation-analysis-grid {
     display: grid;
@@ -502,29 +544,9 @@ td {
     overflow-x: auto;
 }
 
-.vocation-table-scroll thead th {
-    position: sticky;
-    top: 0;
-    background: var(--panel);
-    z-index: 1;
-}
-
-.vocation-table-scroll table {
-    width: 100%;
-}
-
-.checkbox-filter-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text);
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.checkbox-filter-option input {
-    accent-color: var(--accent);
-}
+/* ============================================================
+   Responsive layout
+============================================================ */
 
 @media (max-width: 900px) {
     .vocation-analysis-grid {
@@ -532,49 +554,40 @@ td {
     }
 }
 
-.dashboard-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 28px auto 22px;
-    max-width: 1200px;
-    padding: 0 16px;
-}
+@media (max-width: 850px) {
+    .snapshot-grid,
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
 
-.dashboard-tab {
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--panel);
-    color: var(--muted);
-    padding: 10px 16px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-}
+    .site-header h1 {
+        font-size: 32px;
+    }
 
-.dashboard-tab:hover {
-    border-color: var(--accent);
-    color: var(--text);
-}
+    .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 
-.dashboard-tab.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #04120a;
-}
+    .date-filter {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
 
-.dashboard-tab-section {
-    display: none;
-}
+    .date-filter button,
+    .date-filter input {
+        width: 100%;
+    }
 
-.dashboard-tab-section.active {
-    display: block;
-}
+    .guild-selector {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
 
-#guild-movement-section.active {
-    display: block;
-}
-
-#guild-movement-section .dashboard-card + .dashboard-card {
-    margin-top: 24px;
+    .guild-selector button,
+    .guild-selector select {
+        width: 100%;
+    }
 }
