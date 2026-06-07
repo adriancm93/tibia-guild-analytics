@@ -53,3 +53,13 @@ logs/
 
 # Docker
 *.pid.DS_Store
+
+# Local/generated files
+.DS_Store
+.env
+.env.*
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
