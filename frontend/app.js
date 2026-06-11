@@ -237,6 +237,8 @@ function getDateRange(startElement, endElement) {
     }
 
     return {
+        startDate,
+        endDate,
         startTimestamp: `${startDate}T00:00:00.000Z`,
         endTimestamp: `${endDate}T23:59:59.999Z`
     };
@@ -248,6 +250,14 @@ function buildSupabaseDateRangeQuery(baseQuery, dateRange, dateColumn = "latest_
     }
 
     return `${baseQuery}&${dateColumn}=gte.${dateRange.startTimestamp}&${dateColumn}=lte.${dateRange.endTimestamp}`;
+}
+
+function buildSupabaseDateOnlyRangeQuery(baseQuery, dateRange, dateColumn = "activity_date") {
+    if (!dateRange) {
+        return baseQuery;
+    }
+
+    return `${baseQuery}&${dateColumn}=gte.${dateRange.startDate}&${dateColumn}=lte.${dateRange.endDate}`;
 }
 
 function applyDateInputBounds(minDate, maxDate) {
@@ -348,6 +358,16 @@ async function fetchLevelChanges(dateRange = null) {
     query = buildSupabaseDateRangeQuery(query, dateRange);
 
     return fetchSupabase("api_historical_character_level_changes", query);
+}
+
+async function fetchCharacterOnlineMinutesByDay(dateRange = null) {
+    let query = appendGuildFilters(
+        "select=character_name,activity_date,estimated_online_minutes,online_interval_rows&order=activity_date.desc,character_name.asc"
+    );
+
+    query = buildSupabaseDateOnlyRangeQuery(query, dateRange);
+
+    return fetchSupabase("api_character_online_minutes_by_day", query);
 }
 
 async function fetchGuildJoins(dateRange = null) {
@@ -473,7 +493,6 @@ function aggregateLevelChangesByCharacter(levelChanges) {
 
     levelChanges.forEach((row) => {
         const characterName = row.character_name;
-        const onlineMinutes = Number(row.estimated_online_minutes || 0);
 
         if (!characterMap.has(characterName)) {
             characterMap.set(characterName, {
@@ -483,7 +502,7 @@ function aggregateLevelChangesByCharacter(levelChanges) {
                 previous_level: row.previous_level,
                 current_level: row.current_level,
                 level_gain: Number(row.level_gain) || 0,
-                estimated_online_minutes: onlineMinutes,
+                estimated_online_minutes: 0,
                 first_snapshot_time: row.previous_snapshot_time,
                 latest_snapshot_time: row.latest_snapshot_time
             });
@@ -494,11 +513,6 @@ function aggregateLevelChangesByCharacter(levelChanges) {
         const existing = characterMap.get(characterName);
 
         existing.level_gain += Number(row.level_gain) || 0;
-
-        existing.estimated_online_minutes = Math.max(
-            Number(existing.estimated_online_minutes || 0),
-            onlineMinutes
-        );
 
         const rowPreviousTime = new Date(row.previous_snapshot_time).getTime();
         const existingFirstTime = new Date(existing.first_snapshot_time).getTime();
@@ -520,6 +534,33 @@ function aggregateLevelChangesByCharacter(levelChanges) {
     });
 
     return Array.from(characterMap.values());
+}
+
+function aggregateOnlineMinutesByCharacter(onlineMinuteRows) {
+    const onlineMinutesByCharacter = new Map();
+
+    onlineMinuteRows.forEach((row) => {
+        const characterName = row.character_name;
+        const currentMinutes = Number(
+            onlineMinutesByCharacter.get(characterName) || 0
+        );
+        const rowMinutes = Number(row.estimated_online_minutes || 0);
+
+        onlineMinutesByCharacter.set(characterName, currentMinutes + rowMinutes);
+    });
+
+    return onlineMinutesByCharacter;
+}
+
+function mergeOnlineMinutesIntoLevelChanges(levelChanges, onlineMinutesByCharacter) {
+    return levelChanges.map((levelChange) => {
+        return {
+            ...levelChange,
+            estimated_online_minutes: Number(
+                onlineMinutesByCharacter.get(levelChange.character_name) || 0
+            )
+        };
+    });
 }
 
 function filterRowsByCharacterName(rows, searchValue) {
@@ -1139,9 +1180,19 @@ async function loadGuildOverview() {
 
 async function loadLevelChanges() {
     const dateRange = getDateRange(levelStartDateElement, levelEndDateElement);
-    const rawLevelChanges = await fetchLevelChanges(dateRange);
 
-    tableData.level = aggregateLevelChangesByCharacter(rawLevelChanges);
+    const [rawLevelChanges, onlineMinuteRows] = await Promise.all([
+        fetchLevelChanges(dateRange),
+        fetchCharacterOnlineMinutesByDay(dateRange)
+    ]);
+
+    const aggregatedLevelChanges = aggregateLevelChangesByCharacter(rawLevelChanges);
+    const onlineMinutesByCharacter = aggregateOnlineMinutesByCharacter(onlineMinuteRows);
+
+    tableData.level = mergeOnlineMinutesIntoLevelChanges(
+        aggregatedLevelChanges,
+        onlineMinutesByCharacter
+    );
 
     renderSortedTable("level");
 }
