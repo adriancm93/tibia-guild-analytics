@@ -315,8 +315,6 @@ Deno.serve(async (request) => {
     let failureCount = 0;
     let memberRowsInserted = 0;
 
-    const frontendRefreshResults: FrontendAnalyticsRefreshResult[] = [];
-
     console.log(`World: ${world}`);
     console.log(`Batch size: ${batchSize}`);
     console.log(`Claimed guilds: ${dueGuilds.length}`);
@@ -326,15 +324,6 @@ Deno.serve(async (request) => {
         console.log(`Refreshing ${guild.guild_name} / ${guild.world}`);
 
         const memberCount = await loadGuildSnapshot(guild);
-
-        const frontendRefreshResult = await refreshFrontendAnalyticsForGuild(guild);
-        frontendRefreshResults.push(frontendRefreshResult);
-
-        if (!frontendRefreshResult.succeeded) {
-          throw new Error(
-            `Frontend analytics refresh failed: ${frontendRefreshResult.error_message}`,
-          );
-        }
 
         await markSuccess(guild.guild_id);
 
@@ -353,8 +342,6 @@ Deno.serve(async (request) => {
       }
     }
 
-    const deletedSnapshots = await applyRetention();
-
     return new Response(
       JSON.stringify({
         success: true,
@@ -365,14 +352,8 @@ Deno.serve(async (request) => {
         failure_count: failureCount,
         member_rows_inserted: memberRowsInserted,
         stale_running_released: releasedCountResponse.data ?? null,
-        deleted_snapshots: deletedSnapshots,
-        frontend_refresh_results: frontendRefreshResults,
-        frontend_refresh_success_count: frontendRefreshResults.filter((result) => {
-          return result.succeeded;
-        }).length,
-        frontend_refresh_failure_count: frontendRefreshResults.filter((result) => {
-          return !result.succeeded;
-        }).length,
+        analytics_refresh_skipped: true,
+        retention_skipped: true,
       }),
       {
         status: 200,
