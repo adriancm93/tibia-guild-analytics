@@ -28,14 +28,6 @@ type RefreshRequestBody = {
   batch_size?: number;
 };
 
-type FrontendAnalyticsRefreshResult = {
-  guild_name: string;
-  world: string;
-  succeeded: boolean;
-  error_message: string | null;
-  result: unknown | null;
-};
-
 const SUPABASE_URL = Deno.env.get("PROJECT_SUPABASE_URL");
 const SUPABASE_SECRET_KEY = Deno.env.get("PROJECT_SUPABASE_SECRET_KEY");
 const CRON_SECRET = Deno.env.get("GUILD_REFRESH_SECRET") || "";
@@ -161,52 +153,6 @@ async function markFailure(guildId: string, errorMessage: string): Promise<void>
     console.error("Failed to mark guild failure:", error);
   }
 }
-
-async function applyRetention(): Promise<number | null> {
-  const { data, error } = await supabase.rpc("apply_snapshot_retention", {
-    retention_window: "3 months",
-  });
-
-  if (error) {
-    console.error("Retention failed:", error);
-    return null;
-  }
-
-  return data;
-}
-
-async function refreshFrontendAnalyticsForGuild(
-  guild: ClaimedGuild,
-): Promise<FrontendAnalyticsRefreshResult> {
-  const { data, error } = await supabase.rpc("refresh_frontend_analytics_for_guild", {
-    p_world: guild.world,
-    p_guild_name: guild.guild_name,
-  });
-
-  if (error) {
-    console.error(
-      `Failed to refresh frontend analytics for ${guild.guild_name} / ${guild.world}:`,
-      error,
-    );
-
-    return {
-      guild_name: guild.guild_name,
-      world: guild.world,
-      succeeded: false,
-      error_message: error.message,
-      result: null,
-    };
-  }
-
-  return {
-    guild_name: guild.guild_name,
-    world: guild.world,
-    succeeded: true,
-    error_message: null,
-    result: data,
-  };
-}
-
 async function loadGuildSnapshot(guild: ClaimedGuild): Promise<number> {
   const payload = await fetchGuild(guild.guild_name);
 
