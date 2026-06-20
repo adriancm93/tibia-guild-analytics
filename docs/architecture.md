@@ -135,17 +135,21 @@ This table is the historical fact table for the project.
 
 ---
 
-### 5. Per-guild analytics cache refresh
+### 5. Incremental analytics processing
 
-After a guild is successfully ingested, the Edge Function calls:
+After a guild is successfully ingested, the Edge Function does **not** rebuild analytics directly.
+Production ingestion is intentionally ingestion-only.
+
+Analytics are processed asynchronously by separate Supabase Cron jobs that call:
 
 ```sql
-public.refresh_frontend_analytics_for_guild(p_world, p_guild_name)
+analytics.process_incremental_online_activity(...)
+analytics.process_incremental_general_analytics(...)
 ```
 
-This function rebuilds analytics cache rows only for the refreshed guild.
+These functions look for new, unprocessed snapshot pairs and incrementally update analytics cache tables.
 
-That function populates:
+The incremental processors populate and maintain:
 
 - `analytics.snapshot_pairs_api_cache`
 - `analytics.character_estimated_online_minutes_cache`
@@ -155,15 +159,20 @@ That function populates:
 - `analytics.rank_changes_api_cache`
 - `analytics.latest_guild_members_api_cache`
 
-This is the key performance design in the current architecture.
+This separation is the key performance design in the current production architecture.
 
 ---
 
-## Why Per-Guild Cache Tables Are Used
+## Why Incremental Cache Tables Are Used
 
-Earlier versions of the project used dynamic analytics views and then global materialized views. That worked at smaller scale, but as snapshot volume increased, dashboard queries and global refreshes became too expensive.
+Earlier versions of the project used dynamic analytics views, then per-guild refresh functions, and before that broader rebuild patterns. Those approaches worked at smaller scale, but as snapshot volume increased, direct refresh work inside the ingestion path became too expensive.
 
-The current design uses per-guild cache tables because the ingestion worker refreshes one batch of guilds at a time. After a guild is ingested, only that guild’s analytics need to be rebuilt.
+The current design uses incremental cache maintenance because ingestion, analytics processing, and retention are now split into separate responsibilities:
+
+- the Edge Function ingests new guild snapshots
+- the online-activity processor computes online-time related cache updates
+- the general-analytics processor computes level changes, joins, leaves, rank changes, and latest roster state
+- a separate retention job controls long-term table growth
 
 This provides three benefits:
 

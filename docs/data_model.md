@@ -131,11 +131,14 @@ Important fields include:
 
 Analytics cache tables live in the `analytics` schema. They are the current serving layer for the dashboard.
 
-The cache tables are rebuilt per guild by:
+The cache tables are maintained incrementally by scheduled Supabase Cron jobs that call:
 
 ```sql
-public.refresh_frontend_analytics_for_guild(p_world, p_guild_name)
+analytics.process_incremental_online_activity(...)
+analytics.process_incremental_general_analytics(...)
 ```
+
+These processors read new snapshot pairs, skip pairs that have already been processed, and update only the cache rows needed for frontend API views.
 
 ---
 
@@ -346,13 +349,15 @@ Supabase also creates system schemas such as `auth`, `storage`, `realtime`, `cro
 
 ## Retention
 
-The project uses a retention function:
+The project uses a scheduled safe-retention function:
 
 ```sql
-public.apply_snapshot_retention(retention_window)
+analytics.apply_safe_7_day_snapshot_retention()
 ```
 
-The Edge Function calls retention after ingestion. Retention reduces long-term storage growth by deleting old raw/member snapshots beyond the configured retention window.
+Retention is handled by a separate Supabase Cron job, not by the ingestion Edge Function.
+
+This reduces long-term storage growth by pruning old raw snapshots, normalized member snapshots, and analytics cache rows while keeping recent history available for the dashboard.
 
 ---
 

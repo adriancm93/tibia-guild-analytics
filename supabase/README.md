@@ -82,6 +82,6 @@ Supabase Cron calls the Edge Function on a recurring schedule. The Edge Function
 
 ## Design Notes
 
-Earlier versions of the project used GitHub Actions for scheduled ingestion. GitHub Actions is now treated as a manual fallback only.
+Earlier versions of the project used repository-hosted automation and local scripts. Those legacy workflows have been archived under `archive/` and are no longer part of the production runtime.
 
 The production scheduler is Supabase Cron because it provides more reliable recurring execution for this use case.

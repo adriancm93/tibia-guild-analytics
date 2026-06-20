@@ -6,9 +6,10 @@ The current production database runs on Supabase Postgres and is organized aroun
 
 1. Core raw and parsed snapshot tables
 2. World/guild metadata and refresh queue tables
-3. Per-guild analytics cache tables
+3. Incremental analytics cache tables
 4. Public API views consumed by the frontend
 5. RPC functions used by the Supabase Edge Function
+6. Scheduled analytics and retention functions used by Supabase Cron
 
 ---
 
@@ -28,9 +29,14 @@ The current production database runs on Supabase Postgres and is organized aroun
 The current serving pattern is:
 
 ```text
-guild_member_snapshot
+Supabase Cron
         ↓
-refresh_frontend_analytics_for_guild(world, guild_name)
+Supabase Edge Function: refresh-guilds
+        ↓
+public.raw_guild_snapshot
+public.guild_member_snapshot
+        ↓
+Supabase Cron incremental processors
         ↓
 analytics.*_cache tables
         ↓
@@ -41,7 +47,9 @@ Supabase REST API
 Frontend
 ```
 
-The dashboard does not query dynamic historical comparison views. Expensive analytics are precomputed into cache tables per guild.
+The Edge Function is ingestion-only. It claims due guilds, fetches TibiaData, stores raw snapshots, stores normalized member rows, and marks guild refresh status.
+
+Analytics are processed asynchronously by scheduled Postgres functions. This keeps ingestion fast and prevents one large refresh operation from blocking the pipeline.
 
 ---
 
@@ -86,7 +94,9 @@ The dashboard does not query dynamic historical comparison views. Expensive anal
 
 ---
 
-## Current RPC Functions
+## Current Production Functions
+
+### RPC functions used by the Edge Function
 
 | Function | Purpose |
 |---|---|
@@ -94,8 +104,14 @@ The dashboard does not query dynamic historical comparison views. Expensive anal
 | `public.mark_guild_refresh_success` | Marks successful refreshes |
 | `public.mark_guild_refresh_failure` | Marks failed refreshes |
 | `public.release_stale_running_guild_refreshes` | Recovers stale running jobs |
-| `public.apply_snapshot_retention` | Applies the snapshot retention policy |
-| `public.refresh_frontend_analytics_for_guild` | Refreshes frontend cache rows for one guild |
+
+### Functions used by Supabase Cron
+
+| Function | Purpose |
+|---|---|
+| `analytics.process_incremental_online_activity` | Processes online activity from unprocessed snapshot pairs |
+| `analytics.process_incremental_general_analytics` | Processes level changes, joins, leaves, rank changes, and latest roster cache |
+| `analytics.apply_safe_7_day_snapshot_retention` | Applies safe 7-day retention across raw, normalized, and analytics cache tables |
 
 ---
 
@@ -103,4 +119,12 @@ The dashboard does not query dynamic historical comparison views. Expensive anal
 
 The database intentionally uses cache tables instead of global materialized views.
 
-Earlier global materialized-view and dynamic-view approaches became too expensive as the dataset grew. The current design refreshes only the guild that was ingested, which is more scalable and better aligned with the queue-based ingestion model.
+Earlier global materialized-view and dynamic-view approaches became too expensive as the dataset grew. The current design separates ingestion from analytics:
+
+- Ingestion runs through the Edge Function.
+- Analytics run through incremental scheduled processors.
+- Each processor tracks completed snapshot pairs to avoid reprocessing.
+- Public API views read from precomputed cache tables.
+- Retention runs separately to control storage growth.
+
+This design is more scalable than rebuilding all analytics during every guild refresh.

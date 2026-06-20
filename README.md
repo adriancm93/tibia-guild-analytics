@@ -112,19 +112,32 @@ Each guild member is parsed into one row per character per snapshot and stored i
 public.guild_member_snapshot
 ```
 
-### 6. Per-guild analytics cache refresh
+### 6. Incremental analytics processing
 
-After a guild is successfully ingested, the Edge Function calls:
+The Edge Function does not rebuild analytics directly. It is intentionally ingestion-only.
 
-```text
-public.refresh_frontend_analytics_for_guild(world, guild_name)
+Analytics are processed asynchronously by Supabase Cron jobs that call Postgres functions:
+
+```text id="plrn2l"
+analytics.process_incremental_online_activity(...)
+analytics.process_incremental_general_analytics(...)
 ```
 
-That function rebuilds only that guild’s frontend analytics cache rows.
+These processors look for unprocessed snapshot pairs, calculate changes, and update analytics cache tables incrementally.
 
-### 7. Public API views
+### 7. Retention
 
-The frontend reads from public views in the `public` schema. These views sit on top of precomputed cache tables and are optimized for dashboard queries.
+A separate daily Supabase Cron job applies safe retention:
+
+```text id="w7mr3n"
+analytics.apply_safe_7_day_snapshot_retention()
+```
+
+This keeps recent snapshot history while controlling database growth.
+
+### 8. Public API views
+
+The frontend reads from public views in the `public` schema. These views sit on top of precomputed analytics cache tables and are optimized for dashboard queries.
 
 ---
 
@@ -165,7 +178,9 @@ The frontend reads from public views in the `public` schema. These views sit on 
 | `public.api_historical_rank_changes` | Rank changes |
 | `public.api_latest_guild_members` | Latest guild roster |
 
-### RPC functions used by the Edge Function
+### Production functions
+
+#### RPC functions used by the Edge Function
 
 | Function | Purpose |
 |---|---|
@@ -173,8 +188,14 @@ The frontend reads from public views in the `public` schema. These views sit on 
 | `public.mark_guild_refresh_success` | Marks a guild refresh as successful |
 | `public.mark_guild_refresh_failure` | Marks a guild refresh as failed |
 | `public.release_stale_running_guild_refreshes` | Releases stale running guild claims |
-| `public.apply_snapshot_retention` | Deletes snapshots outside the retention window |
-| `public.refresh_frontend_analytics_for_guild` | Rebuilds frontend cache rows for one guild |
+
+#### Analytics and retention functions used by Supabase Cron
+
+| Function | Purpose |
+|---|---|
+| `analytics.process_incremental_online_activity` | Processes online activity from new snapshot pairs |
+| `analytics.process_incremental_general_analytics` | Processes level changes, joins, leaves, rank changes, and latest roster cache |
+| `analytics.apply_safe_7_day_snapshot_retention` | Applies safe 7-day snapshot retention |
 
 ---
 

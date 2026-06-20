@@ -279,15 +279,24 @@ Expected result after a healthy refresh:
 
 ---
 
-## Manually Refresh Cache for One Guild
+## Manually Process Analytics
 
-If raw data exists but cache tables are stale:
+If raw data exists but analytics cache tables are stale, run the incremental analytics processors manually.
+
+For one world and all due guilds:
 
 ```sql
-SELECT public.refresh_frontend_analytics_for_guild(
-    'Lobera',
-    'Black Clover'
-);
+SELECT analytics.process_incremental_online_activity('Lobera', NULL, 100);
+
+SELECT analytics.process_incremental_general_analytics('Lobera', NULL, 100);
+```
+
+For one specific guild:
+
+```sql
+SELECT analytics.process_incremental_online_activity('Lobera', 'Black Clover', 100);
+
+SELECT analytics.process_incremental_general_analytics('Lobera', 'Black Clover', 100);
 ```
 
 Then reload the website.
@@ -372,12 +381,18 @@ ORDER BY routine_schema, routine_name;
 
 Expected project functions:
 
-- `apply_snapshot_retention`
+Public RPC functions used by the Edge Function:
+
 - `claim_due_guild_refresh_batch`
 - `mark_guild_refresh_failure`
 - `mark_guild_refresh_success`
-- `refresh_frontend_analytics_for_guild`
 - `release_stale_running_guild_refreshes`
+
+Analytics and retention functions used by Supabase Cron:
+
+- `process_incremental_online_activity`
+- `process_incremental_general_analytics`
+- `apply_safe_7_day_snapshot_retention`
 
 ---
 
@@ -388,15 +403,16 @@ Expected project functions:
 Likely cause:
 
 ```text
-Raw snapshot inserted, but per-guild cache did not refresh.
+Raw snapshot inserted, but incremental analytics have not processed the latest snapshot pair yet.
 ```
 
 Actions:
 
 1. Compare raw latest snapshot vs cache latest snapshot.
-2. Check Edge Function response for frontend cache refresh failures.
-3. Manually call `refresh_frontend_analytics_for_guild`.
-4. Review Edge Function logs.
+2. Check Supabase Cron job status for the incremental analytics jobs.
+3. Manually run `analytics.process_incremental_online_activity(...)`.
+4. Manually run `analytics.process_incremental_general_analytics(...)`.
+5. Review Edge Function logs only if raw snapshots are missing.
 
 ---
 
