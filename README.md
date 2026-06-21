@@ -487,3 +487,66 @@ Potential next enhancements:
 - Add screenshots and architecture diagrams
 - Add error alerting for failed guild refreshes
 - Add incremental cache refresh metrics
+
+---
+
+## Portfolio Assets
+
+### Live site
+
+Production site:
+
+```text
+https://tibiaguildanalytics.com
+```
+
+### Architecture diagram
+
+The final production architecture diagram is documented here:
+
+```text
+docs/assets/diagrams/architecture.md
+```
+
+High-level flow:
+
+```text
+TibiaData API
+    ↓
+Supabase Edge Function
+    ↓
+Supabase Postgres raw + normalized tables
+    ↓
+Supabase Cron incremental analytics processors
+    ↓
+analytics cache tables
+    ↓
+public.api_* views
+    ↓
+Static frontend
+    ↓
+Cloudflare Pages + custom domain
+```
+
+### Screenshots
+
+| Dashboard | Guild overview |
+|---|---|
+| ![Home dashboard](docs/assets/screenshots/01_home_dashboard.png) | ![Guild overview](docs/assets/screenshots/02_guild_overview.png) |
+
+| Level changes and time online | Guild members |
+|---|---|
+| ![Level changes and time online](docs/assets/screenshots/03_level_changes_time_online.png) | ![Guild members](docs/assets/screenshots/04_guild_members.png) |
+
+### Supporting documentation
+
+| Document | Purpose |
+|---|---|
+| [`docs/architecture.md`](docs/architecture.md) | Production architecture |
+| [`docs/data_model.md`](docs/data_model.md) | Database model and serving layer |
+| [`docs/operations.md`](docs/operations.md) | Operational checks and troubleshooting |
+| [`docs/deployment.md`](docs/deployment.md) | Deployment notes |
+| [`docs/third_party_integrations.md`](docs/third_party_integrations.md) | External services and integrations |
+| [`docs/live_site_verification_checklist.md`](docs/live_site_verification_checklist.md) | Production verification checklist |
+| [`docs/resume_bullets.md`](docs/resume_bullets.md) | Resume bullets and interview talking points |
+| [`docs/portfolio_summary.md`](docs/portfolio_summary.md) | Portfolio summary |
