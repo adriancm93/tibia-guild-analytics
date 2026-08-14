@@ -11,7 +11,7 @@ DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "tibia_analytics")
 DB_USER = os.getenv("DB_USER", "tibia_user")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 def unix_timestamp_to_utc(timestamp):
     """
@@ -85,18 +85,23 @@ def load_market_history(
         start_days_ago (int): Number of days in the past to start the query.
         end_days_ago (int): Number of days in the past to end the query.
     """
-    if not DB_PASSWORD:
+    if not DATABASE_URL and not DB_PASSWORD:
         raise ValueError(
-            "DB_PASSWORD environment variable is not set."
+            "Neither DATABASE_URL nor DB_PASSWORD is set."
         )
 
-    with psycopg.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    ) as conn:
+    if DATABASE_URL:
+        conn = psycopg.connect(DATABASE_URL)
+    else:
+        conn = psycopg.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+
+    with conn:
 
         item_id = get_item_id_by_name(
             conn,
