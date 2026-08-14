@@ -125,6 +125,14 @@
             >
                 Guild Members
             </button>
+
+            <button
+                class="dashboard-tab"
+                type="button"
+                data-tab-target="market-analytics-section"
+            >
+                Market Analytics
+            </button>
         </nav>
 
         <!-- ==================================================
@@ -592,6 +600,119 @@
                 </table>
             </div>
         </section>
+
+        <!-- ==================================================
+            Market analytics
+        =================================================== -->
+        <section
+            id="market-analytics-section"
+            class="dashboard-card dashboard-tab-section"
+            aria-labelledby="market-analytics-heading"
+        >
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Market Analytics</p>
+                    <h2 id="market-analytics-heading">Item Price History</h2>
+                    <p>
+                        Select a world, search for an item, and choose a date range
+                        to view its historical market prices.
+                    </p>
+                </div>
+            </div>
+
+            <div class="market-controls">
+                <label>
+                    World
+                    <select id="market-world-select">
+                        <option value="Lobera">Lobera</option>
+                    </select>
+                </label>
+
+                <div class="market-item-search">
+                    <label for="market-item-search">
+                        Item
+                    </label>
+
+                    <input
+                        id="market-item-search"
+                        type="search"
+                        placeholder="Search item..."
+                        autocomplete="off"
+                    />
+
+                    <div
+                        id="market-item-results"
+                        class="market-item-results"
+                        hidden
+                    ></div>
+
+                    <p id="market-selected-item" class="market-selected-item">
+                        No item selected.
+                    </p>
+                </div>
+
+                <label>
+                    Start Date
+                    <input id="market-start-date" type="date" />
+                </label>
+
+                <label>
+                    End Date
+                    <input id="market-end-date" type="date" />
+                </label>
+
+                <button id="apply-market-filter" type="button">
+                    Apply
+                </button>
+            </div>
+
+            <div id="market-status" class="market-status">
+                Search for an item to begin.
+            </div>
+
+            <div class="market-summary-grid">
+                <div class="card metric-card">
+                    <p class="card-label">Observations</p>
+                    <p id="market-observation-count" class="metric-value">0</p>
+                </div>
+
+                <div class="card metric-card">
+                    <p class="card-label">Latest Buy Offer</p>
+                    <p id="market-latest-buy" class="metric-value">—</p>
+                </div>
+
+                <div class="card metric-card">
+                    <p class="card-label">Latest Sell Offer</p>
+                    <p id="market-latest-sell" class="metric-value">—</p>
+                </div>
+
+                <div class="card metric-card">
+                    <p class="card-label">Latest Spread</p>
+                    <p id="market-latest-spread" class="metric-value">—</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Best Buy Offer</th>
+                            <th>Best Sell Offer</th>
+                            <th>Spread</th>
+                            <th>Spread %</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="market-history-table">
+                        <tr>
+                            <td colspan="5">No market data loaded.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <footer class="site-footer">

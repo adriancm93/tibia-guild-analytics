@@ -545,6 +545,122 @@ td {
 }
 
 /* ============================================================
+   Market analytics
+============================================================ */
+
+.market-controls {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.market-controls label,
+.market-item-search {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.market-controls select,
+.market-controls input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 10px 12px;
+    min-width: 180px;
+}
+
+.market-controls select:focus,
+.market-controls input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.market-item-search {
+    position: relative;
+    min-width: 280px;
+}
+
+.market-item-results {
+    position: absolute;
+    top: calc(100% - 21px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+}
+
+.market-item-option {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    padding: 12px;
+    text-align: left;
+}
+
+.market-item-option:last-child {
+    border-bottom: 0;
+}
+
+.market-item-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.market-item-option-name {
+    font-weight: 800;
+}
+
+.market-item-option-details {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.market-item-empty {
+    padding: 14px;
+    color: var(--muted);
+}
+
+.market-selected-item {
+    min-height: 18px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.market-status {
+    margin: 12px 0 20px;
+    color: var(--muted);
+}
+
+.market-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.market-summary-grid .metric-value {
+    font-size: clamp(20px, 2vw, 30px);
+}
+
+/* ============================================================
    Responsive layout
 ============================================================ */
 

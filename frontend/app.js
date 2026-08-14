@@ -77,6 +77,57 @@ const clearVocationAnalysisFilterButton = document.getElementById("clear-vocatio
 const dashboardTabButtons = document.querySelectorAll(".dashboard-tab");
 const dashboardTabSections = document.querySelectorAll(".dashboard-tab-section");
 
+const marketWorldSelectElement = document.getElementById(
+    "market-world-select"
+);
+
+const marketItemSearchElement = document.getElementById(
+    "market-item-search"
+);
+
+const marketItemResultsElement = document.getElementById(
+    "market-item-results"
+);
+
+const marketSelectedItemElement = document.getElementById(
+    "market-selected-item"
+);
+
+const marketStartDateElement = document.getElementById(
+    "market-start-date"
+);
+
+const marketEndDateElement = document.getElementById(
+    "market-end-date"
+);
+
+const applyMarketFilterButton = document.getElementById(
+    "apply-market-filter"
+);
+
+const marketStatusElement = document.getElementById(
+    "market-status"
+);
+
+const marketObservationCountElement = document.getElementById(
+    "market-observation-count"
+);
+
+const marketLatestBuyElement = document.getElementById(
+    "market-latest-buy"
+);
+
+const marketLatestSellElement = document.getElementById(
+    "market-latest-sell"
+);
+
+const marketLatestSpreadElement = document.getElementById(
+    "market-latest-spread"
+);
+
+const marketHistoryTableElement = document.getElementById(
+    "market-history-table"
+);
 
 // ============================================================
 // 2. State and constants
@@ -90,6 +141,10 @@ const BASE_VOCATIONS = ["Monk", "Knight", "Paladin", "Druid", "Sorcerer"];
 let selectedWorld = "Lobera";
 let selectedGuild = "Black Clover";
 let availableGuilds = [];
+
+let selectedMarketItem = null;
+let marketItemSearchTimeout = null;
+let marketHistoryData = [];
 
 const tableData = {
     level: [],
@@ -127,6 +182,44 @@ const tableSortState = {
     }
 };
 
+function formatGold(value) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "—";
+    }
+
+    return `${new Intl.NumberFormat("en-US").format(number)} gp`;
+}
+
+function formatPercentage(value) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "—";
+    }
+
+    return `${number.toFixed(2)}%`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function setDefaultMarketDateRange() {
+    marketStartDateElement.value = formatDateInputValue(
+        getDateDaysAgo(365)
+    );
+
+    marketEndDateElement.value = formatDateInputValue(
+        new Date()
+    );
+}
 
 // ============================================================
 // 3. Formatting and query utilities
@@ -408,6 +501,44 @@ async function fetchGuildMembers() {
     return fetchSupabase("api_latest_guild_members", query);
 }
 
+async function fetchMarketItems(searchValue) {
+    const normalizedSearch = String(searchValue || "").trim();
+
+    if (normalizedSearch.length < 2) {
+        return [];
+    }
+
+    const encodedSearch = encodeFilterValue(
+        `*${normalizedSearch}*`
+    );
+
+    const query = [
+        "select=item_id,name,category,tier,wiki_name",
+        `or=(name.ilike.${encodedSearch},wiki_name.ilike.${encodedSearch})`,
+        "order=wiki_name.asc",
+        "limit=20"
+    ].join("&");
+
+    return fetchSupabase("api_market_items", query);
+}
+
+async function fetchMarketHistory({
+    world,
+    itemId,
+    startDate,
+    endDate
+}) {
+    const query = [
+        "select=world,item_id,item_name,observed_at_utc,buy_offer,sell_offer,spread,spread_pct",
+        `world=eq.${encodeFilterValue(world)}`,
+        `item_id=eq.${encodeFilterValue(itemId)}`,
+        `observed_at_utc=gte.${startDate}T00:00:00.000Z`,
+        `observed_at_utc=lte.${endDate}T23:59:59.999Z`,
+        "order=observed_at_utc.asc"
+    ].join("&");
+
+    return fetchSupabase("api_market_history", query);
+}
 
 // ============================================================
 // 5. Data preparation, filtering, and sorting
@@ -1070,6 +1201,99 @@ function renderDashboardErrorState(error) {
     `;
 }
 
+function renderMarketItemResults(items) {
+    if (!items.length) {
+        marketItemResultsElement.innerHTML = `
+            <div class="market-item-empty">
+                No matching items found.
+            </div>
+        `;
+
+        marketItemResultsElement.hidden = false;
+        return;
+    }
+
+    marketItemResultsElement.innerHTML = items
+        .map((item) => {
+            return `
+                <button
+                    type="button"
+                    class="market-item-option"
+                    data-item-id="${item.item_id}"
+                    data-item-name="${escapeHtml(
+                        item.wiki_name || item.name
+                    )}"
+                >
+                    <span class="market-item-option-name">
+                        ${escapeHtml(item.wiki_name || item.name)}
+                    </span>
+
+                    <span class="market-item-option-details">
+                        ${escapeHtml(item.category || "Unknown category")}
+                        · ID ${item.item_id}
+                    </span>
+                </button>
+            `;
+        })
+        .join("");
+
+    marketItemResultsElement.hidden = false;
+}
+
+function renderMarketHistoryTable(rows) {
+    if (!rows.length) {
+        marketHistoryTableElement.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No market observations found within the selected date range.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    marketHistoryTableElement.innerHTML = rows
+        .map((row) => {
+            return `
+                <tr>
+                    <td>${formatChicagoDate(row.observed_at_utc)}</td>
+                    <td>${formatGold(row.buy_offer)}</td>
+                    <td>${formatGold(row.sell_offer)}</td>
+                    <td>${formatGold(row.spread)}</td>
+                    <td>${formatPercentage(row.spread_pct)}</td>
+                </tr>
+            `;
+        })
+        .join("");
+}
+
+function renderMarketSummary(rows) {
+    marketObservationCountElement.textContent =
+        new Intl.NumberFormat("en-US").format(rows.length);
+
+    const latestRow = rows.at(-1);
+
+    if (!latestRow) {
+        marketLatestBuyElement.textContent = "—";
+        marketLatestSellElement.textContent = "—";
+        marketLatestSpreadElement.textContent = "—";
+        return;
+    }
+
+    marketLatestBuyElement.textContent = formatGold(
+        latestRow.buy_offer
+    );
+
+    marketLatestSellElement.textContent = formatGold(
+        latestRow.sell_offer
+    );
+
+    marketLatestSpreadElement.textContent = [
+        formatGold(latestRow.spread),
+        `(${formatPercentage(latestRow.spread_pct)})`
+    ].join(" ");
+}
 
 // ============================================================
 // 7. UI behavior helpers
@@ -1267,6 +1491,87 @@ async function loadDashboard() {
     }
 }
 
+async function searchMarketItems() {
+    const searchValue = marketItemSearchElement.value.trim();
+
+    if (searchValue.length < 2) {
+        marketItemResultsElement.hidden = true;
+        marketItemResultsElement.innerHTML = "";
+        return;
+    }
+
+    try {
+        const items = await fetchMarketItems(searchValue);
+        renderMarketItemResults(items);
+    } catch (error) {
+        console.error("Unable to search market items:", error);
+
+        marketItemResultsElement.innerHTML = `
+            <div class="market-item-empty">
+                Unable to load item results.
+            </div>
+        `;
+
+        marketItemResultsElement.hidden = false;
+    }
+}
+
+async function loadMarketHistory() {
+    if (!selectedMarketItem) {
+        marketStatusElement.textContent =
+            "Select an item before loading market history.";
+        return;
+    }
+
+    const world = marketWorldSelectElement.value;
+    const startDate = marketStartDateElement.value;
+    const endDate = marketEndDateElement.value;
+
+    if (!world || !startDate || !endDate) {
+        marketStatusElement.textContent =
+            "World, item, start date, and end date are required.";
+        return;
+    }
+
+    if (startDate > endDate) {
+        marketStatusElement.textContent =
+            "Start date cannot be after end date.";
+        return;
+    }
+
+    marketStatusElement.textContent = "Loading market history...";
+    applyMarketFilterButton.disabled = true;
+
+    try {
+        const rows = await fetchMarketHistory({
+            world,
+            itemId: selectedMarketItem.itemId,
+            startDate,
+            endDate
+        });
+
+        marketHistoryData = rows;
+
+        renderMarketHistoryTable(rows);
+        renderMarketSummary(rows);
+
+        marketStatusElement.textContent = rows.length
+            ? `${selectedMarketItem.itemName} market history loaded successfully.`
+            : "No observations were found for the selected filters.";
+    } catch (error) {
+        console.error("Unable to load market history:", error);
+
+        marketStatusElement.textContent =
+            "Unable to load market history.";
+
+        marketHistoryData = [];
+
+        renderMarketHistoryTable([]);
+        renderMarketSummary([]);
+    } finally {
+        applyMarketFilterButton.disabled = false;
+    }
+}
 
 // ============================================================
 // 9. Event binding
@@ -1393,8 +1698,60 @@ function bindEventListeners() {
     bindCharacterFilterEvents();
     bindVocationAnalysisEvents();
     bindDashboardTabEvents();
+    bindMarketAnalyticsEvents();
 }
 
+function bindMarketAnalyticsEvents() {
+    marketItemSearchElement?.addEventListener("input", () => {
+        selectedMarketItem = null;
+
+        marketSelectedItemElement.textContent =
+            "No item selected.";
+
+        clearTimeout(marketItemSearchTimeout);
+
+        marketItemSearchTimeout = setTimeout(() => {
+            searchMarketItems();
+        }, 300);
+    });
+
+    marketItemResultsElement?.addEventListener("click", (event) => {
+        const option = event.target.closest(".market-item-option");
+
+        if (!option) {
+            return;
+        }
+
+        selectedMarketItem = {
+            itemId: Number(option.dataset.itemId),
+            itemName: option.dataset.itemName
+        };
+
+        marketItemSearchElement.value =
+            selectedMarketItem.itemName;
+
+        marketSelectedItemElement.textContent =
+            `Selected: ${selectedMarketItem.itemName}`;
+
+        marketItemResultsElement.hidden = true;
+        marketItemResultsElement.innerHTML = "";
+    });
+
+    applyMarketFilterButton?.addEventListener(
+        "click",
+        loadMarketHistory
+    );
+
+    document.addEventListener("click", (event) => {
+        const clickedInsideSearch = event.target.closest(
+            ".market-item-search"
+        );
+
+        if (!clickedInsideSearch) {
+            marketItemResultsElement.hidden = true;
+        }
+    });
+}
 
 // ============================================================
 // 10. App initialization
@@ -1408,7 +1765,8 @@ async function initializeApp() {
         await initializeDateBounds();
 
         setDefaultDateRanges();
-
+        setDefaultMarketDateRange();
+        
         await loadDashboard();
     } catch (error) {
         console.error("Unable to initialize dashboard:", error);
