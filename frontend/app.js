@@ -129,6 +129,10 @@ const marketHistoryTableElement = document.getElementById(
     "market-history-table"
 );
 
+const marketPriceChartElement = document.getElementById(
+    "market-price-chart"
+);
+
 // ============================================================
 // 2. State and constants
 // ============================================================
@@ -145,6 +149,8 @@ let availableGuilds = [];
 let selectedMarketItem = null;
 let marketItemSearchTimeout = null;
 let marketHistoryData = [];
+
+let marketPriceChart = null;
 
 const tableData = {
     level: [],
@@ -395,6 +401,31 @@ function setDefaultDateRanges() {
     rankEndDateElement.value = defaultEndDate;
 }
 
+function formatMarketTooltipDate(timestamp) {
+    if (!timestamp) {
+        return "Unknown date";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    }).format(new Date(timestamp));
+}
+
+function formatMarketTooltipDate(timestamp) {
+    if (!timestamp) {
+        return "Unknown date";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    }).format(new Date(timestamp));
+}
 
 // ============================================================
 // 4. Supabase data access
@@ -1295,6 +1326,165 @@ function renderMarketSummary(rows) {
     ].join(" ");
 }
 
+function renderMarketPriceChart(rows) {
+    if (!marketPriceChartElement) {
+        return;
+    }
+
+    if (marketPriceChart) {
+        marketPriceChart.destroy();
+        marketPriceChart = null;
+    }
+
+    if (!rows.length) {
+        return;
+    }
+
+    const labels = rows.map((row) => {
+        return formatChicagoDate(row.observed_at_utc);
+    });
+
+    const buyOffers = rows.map((row) => {
+        return Number(row.buy_offer);
+    });
+
+    const sellOffers = rows.map((row) => {
+        return Number(row.sell_offer);
+    });
+
+    marketPriceChart = new Chart(
+        marketPriceChartElement,
+        {
+            type: "line",
+
+            data: {
+                labels,
+
+                datasets: [
+                    {
+                        label: "Best Buy Offer",
+                        data: buyOffers,
+                        borderColor: "#22c55e",
+                        backgroundColor: "#22c55e",
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: "Best Sell Offer",
+                        data: sellOffers,
+                        borderColor: "#60a5fa",
+                        backgroundColor: "#60a5fa",
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 6,
+                        tension: 0.25,
+                        fill: false
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
+                    },
+
+                    tooltip: {
+                        mode: "index",
+                        intersect: false,
+
+                        callbacks: {
+                            title(tooltipItems) {
+                                const rowIndex =
+                                    tooltipItems[0]?.dataIndex;
+
+                                const row = rows[rowIndex];
+
+                                return formatMarketTooltipDate(
+                                    row?.observed_at_utc
+                                );
+                            },
+
+                            label(context) {
+                                return [
+                                    `${context.dataset.label}: `,
+                                    formatGold(context.raw)
+                                ].join("");
+                            },
+
+                            afterBody(tooltipItems) {
+                                const rowIndex =
+                                    tooltipItems[0]?.dataIndex;
+
+                                const row = rows[rowIndex];
+
+                                if (!row) {
+                                    return [];
+                                }
+
+                                return [
+                                    `Spread: ${formatGold(row.spread)}`,
+                                    `Spread %: ${formatPercentage(
+                                        row.spread_pct
+                                    )}`
+                                ];
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 12
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: false,
+
+                        ticks: {
+                            callback(value) {
+                                return new Intl.NumberFormat(
+                                    "en-US",
+                                    {
+                                        notation: "compact",
+                                        maximumFractionDigits: 1
+                                    }
+                                ).format(value);
+                            }
+                        },
+
+                        title: {
+                            display: true,
+                            text: "Price (gold)"
+                        }
+                    }
+                }
+            }
+        }
+    );
+}
+
 // ============================================================
 // 7. UI behavior helpers
 // ============================================================
@@ -1554,6 +1744,7 @@ async function loadMarketHistory() {
 
         renderMarketHistoryTable(rows);
         renderMarketSummary(rows);
+        renderMarketPriceChart(rows);
 
         marketStatusElement.textContent = rows.length
             ? `${selectedMarketItem.itemName} market history loaded successfully.`
@@ -1568,6 +1759,7 @@ async function loadMarketHistory() {
 
         renderMarketHistoryTable([]);
         renderMarketSummary([]);
+        renderMarketPriceChart([]);
     } finally {
         applyMarketFilterButton.disabled = false;
     }
@@ -1766,7 +1958,7 @@ async function initializeApp() {
 
         setDefaultDateRanges();
         setDefaultMarketDateRange();
-        
+
         await loadDashboard();
     } catch (error) {
         console.error("Unable to initialize dashboard:", error);

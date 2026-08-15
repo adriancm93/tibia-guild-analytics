@@ -691,7 +691,14 @@
                     <p id="market-latest-spread" class="metric-value">—</p>
                 </div>
             </div>
-
+            
+            <div class="market-chart-container">
+                <canvas
+                    id="market-price-chart"
+                    aria-label="Historical market buy and sell prices"
+                    role="img"
+                ></canvas>
+            </div>
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -720,6 +727,11 @@
     </footer>
 
     <script src="config.js"></script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+    ></script>
+
     <script src="app.js"></script>
 </body>
 </html>
