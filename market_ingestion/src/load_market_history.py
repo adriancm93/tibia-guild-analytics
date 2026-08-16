@@ -124,9 +124,11 @@ def load_market_history(
         valid_rows = [
             row
             for row in history
-            if row.get("is_full_data") is True
-            and row.get("buy_offer", -1) > 0
-            and row.get("sell_offer", -1) > 0
+            if (
+                row.get("buy_offer", -1) > 0
+                or row.get("sell_offer", -1) > 0
+            )
+            and row.get("time", 0) > 0
         ]
 
         print(f"Valid market observations: {len(valid_rows)}")
@@ -157,13 +159,38 @@ def load_market_history(
             )
             DO UPDATE SET
                 observed_at_utc = EXCLUDED.observed_at_utc,
-                buy_offer = EXCLUDED.buy_offer,
-                sell_offer = EXCLUDED.sell_offer,
-    loaded_at_utc = NOW();
+
+                buy_offer = COALESCE(
+                    EXCLUDED.buy_offer,
+                    market_price_history.buy_offer
+                ),
+
+                sell_offer = COALESCE(
+                    EXCLUDED.sell_offer,
+                    market_price_history.sell_offer
+                ),
+
+                loaded_at_utc = NOW();
         """
 
         with conn.cursor() as cur:
             for row in valid_rows:
+                observed_at_utc = unix_timestamp_to_utc(
+                    row["time"]
+                )
+
+                buy_offer = (
+                    row.get("buy_offer")
+                    if row.get("buy_offer", -1) > 0
+                    else None
+                )
+
+                sell_offer = (
+                    row.get("sell_offer")
+                    if row.get("sell_offer", -1) > 0
+                    else None
+                )
+
                 cur.execute(
                     upsert_sql,
                     {
@@ -171,8 +198,8 @@ def load_market_history(
                         "item_id": item_id,
                         "observed_at_utc": observed_at_utc,
                         "observed_date": observed_at_utc.date(),
-                        "buy_offer": row["buy_offer"],
-                        "sell_offer": row["sell_offer"],
+                        "buy_offer": buy_offer,
+                        "sell_offer": sell_offer,
                     }
                 )
 

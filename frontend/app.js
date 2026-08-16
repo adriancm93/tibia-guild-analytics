@@ -189,16 +189,34 @@ const tableSortState = {
 };
 
 function formatGold(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "—";
+    }
+
     const number = Number(value);
 
     if (!Number.isFinite(number)) {
         return "—";
     }
 
-    return `${new Intl.NumberFormat("en-US").format(number)} gp`;
+    return `${new Intl.NumberFormat(
+        "en-US"
+    ).format(number)} gp`;
 }
 
 function formatPercentage(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "—";
+    }
+
     const number = Number(value);
 
     if (!Number.isFinite(number)) {
@@ -1403,11 +1421,15 @@ function renderMarketPriceChart(rows) {
     });
 
     const buyOffers = rows.map((row) => {
-        return Number(row.buy_offer);
+        return row.buy_offer === null
+            ? null
+            : Number(row.buy_offer);
     });
 
     const sellOffers = rows.map((row) => {
-        return Number(row.sell_offer);
+        return row.sell_offer === null
+            ? null
+            : Number(row.sell_offer);
     });
 
     marketPriceChart = new Chart(
@@ -1427,7 +1449,8 @@ function renderMarketPriceChart(rows) {
                         borderWidth: 2,
                         pointRadius: 2,
                         pointHoverRadius: 6,
-                        tension: 0.4,
+                        tension: 0.25,
+                        spanGaps: false,
                         fill: false
                     },
                     {
@@ -1439,6 +1462,7 @@ function renderMarketPriceChart(rows) {
                         pointRadius: 2,
                         pointHoverRadius: 6,
                         tension: 0.25,
+                        spanGaps: false,
                         fill: false
                     }
                 ]

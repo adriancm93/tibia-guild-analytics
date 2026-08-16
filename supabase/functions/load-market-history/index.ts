@@ -18,9 +18,9 @@ type MarketHistoryInsert = {
   world: string;
   item_id: number;
   observed_at_utc: string;
-  buy_offer: number;
-  sell_offer: number;
   observed_date: string;
+  buy_offer: number | null;
+  sell_offer: number | null;
 };
 
 const SUPABASE_URL = Deno.env.get("PROJECT_SUPABASE_URL");
@@ -291,63 +291,93 @@ function prepareValidRows(
   world: string,
   itemId: number,
 ): MarketHistoryInsert[] {
-  return history
-    .filter((row) => {
-      return (
-        row.is_full_data === true &&
-        Number(row.buy_offer) > 0 &&
-        Number(row.sell_offer) > 0 &&
-        Number(row.time) > 0
-      );
-    })
-    .map((row) => {
-      const observedAtUtc = new Date(
-        Number(row.time) * 1000,
-      );
+  const rowsByDate = new Map<string, MarketHistoryInsert>();
 
-      if (
-        Number.isNaN(observedAtUtc.getTime())
-      ) {
-        throw new Error(
-          "TibiaMarket returned an invalid timestamp.",
-        );
-      }
+  history.forEach((row) => {
+    const buyOffer =
+      Number(row.buy_offer) > 0
+        ? Number(row.buy_offer)
+        : null;
 
-      const observedAtIso = observedAtUtc.toISOString();
+    const sellOffer =
+      Number(row.sell_offer) > 0
+        ? Number(row.sell_offer)
+        : null;
 
-      return {
-        world,
-        item_id: itemId,
-        observed_at_utc: observedAtIso,
-        observed_date: observedAtIso.slice(0, 10),
-        buy_offer: Number(row.buy_offer),
-        sell_offer: Number(row.sell_offer),
-      };
+    /*
+     * Keep the observation when at least one side of the
+     * market contains a valid offer.
+     */
+    if (
+      buyOffer === null &&
+      sellOffer === null
+    ) {
+      return;
+    }
+
+    if (Number(row.time) <= 0) {
+      return;
+    }
+
+    const observedAtUtc = new Date(
+      Number(row.time) * 1000,
+    );
+
+    if (Number.isNaN(observedAtUtc.getTime())) {
+      return;
+    }
+
+    const observedAtIso =
+      observedAtUtc.toISOString();
+
+    const observedDate =
+      observedAtIso.slice(0, 10);
+
+    const existingRow =
+      rowsByDate.get(observedDate);
+
+    /*
+     * Merge multiple observations from the same day.
+     * A valid offer should not be replaced by a missing value.
+     */
+    rowsByDate.set(observedDate, {
+      world,
+      item_id: itemId,
+      observed_at_utc: observedAtIso,
+      observed_date: observedDate,
+      buy_offer:
+        buyOffer ??
+        existingRow?.buy_offer ??
+        null,
+      sell_offer:
+        sellOffer ??
+        existingRow?.sell_offer ??
+        null,
     });
+  });
+
+  return Array.from(rowsByDate.values());
 }
 
 async function upsertMarketHistory(
   rows: MarketHistoryInsert[],
 ): Promise<void> {
-  for (
-    let index = 0;
-    index < rows.length;
-    index += UPSERT_CHUNK_SIZE
-  ) {
-    const chunk = rows.slice(
-      index,
-      index + UPSERT_CHUNK_SIZE,
+  for (const row of rows) {
+    const { error } = await supabase.rpc(
+      "upsert_market_history_observation",
+      {
+        p_world: row.world,
+        p_item_id: row.item_id,
+        p_observed_at_utc:
+          row.observed_at_utc,
+        p_observed_date:
+          row.observed_date,
+        p_buy_offer:
+          row.buy_offer,
+        p_sell_offer:
+          row.sell_offer,
+      },
     );
-
-    const { error } = await supabase
-      .from("market_price_history")
-      .upsert(
-        chunk,
-        {
-          onConflict: "world,item_id,observed_date",
-          ignoreDuplicates: false,
-        },
-      );
 
     if (error) {
       throw error;
