@@ -417,3 +417,14 @@ entrypoint = "./functions/refresh-guilds/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/refresh-guilds/*.html" ]
+
+[functions.load-market-history]
+enabled = true
+verify_jwt = false
+import_map = "./functions/load-market-history/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/load-market-history/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/load-market-history/*.html" ]

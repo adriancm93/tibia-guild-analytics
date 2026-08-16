@@ -136,6 +136,7 @@ def load_market_history(
                 world,
                 item_id,
                 observed_at_utc,
+                observed_date,
                 buy_offer,
                 sell_offer,
                 loaded_at_utc
@@ -144,6 +145,7 @@ def load_market_history(
                 %(world)s,
                 %(item_id)s,
                 %(observed_at_utc)s,
+                %(observed_date)s,
                 %(buy_offer)s,
                 %(sell_offer)s,
                 NOW()
@@ -151,12 +153,13 @@ def load_market_history(
             ON CONFLICT (
                 world,
                 item_id,
-                observed_at_utc
+                observed_date
             )
             DO UPDATE SET
+                observed_at_utc = EXCLUDED.observed_at_utc,
                 buy_offer = EXCLUDED.buy_offer,
                 sell_offer = EXCLUDED.sell_offer,
-                loaded_at_utc = NOW();
+    loaded_at_utc = NOW();
         """
 
         with conn.cursor() as cur:
@@ -166,9 +169,8 @@ def load_market_history(
                     {
                         "world": server,
                         "item_id": item_id,
-                        "observed_at_utc": unix_timestamp_to_utc(
-                            row["time"]
-                        ),
+                        "observed_at_utc": observed_at_utc,
+                        "observed_date": observed_at_utc.date(),
                         "buy_offer": row["buy_offer"],
                         "sell_offer": row["sell_offer"],
                     }
