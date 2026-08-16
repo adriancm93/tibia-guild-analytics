@@ -427,6 +427,22 @@ function formatMarketTooltipDate(timestamp) {
     }).format(new Date(timestamp));
 }
 
+function calculateMarketHistoryDays(startDate) {
+    const start = new Date(`${startDate}T00:00:00.000Z`);
+    const now = new Date();
+
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const difference = now.getTime() - start.getTime();
+
+    if (!Number.isFinite(difference) || difference < 0) {
+        return 1;
+    }
+
+    const days = Math.ceil(difference / millisecondsPerDay);
+
+    return Math.min(Math.max(days, 1), 10000);
+}
+
 // ============================================================
 // 4. Supabase data access
 // ============================================================
@@ -569,6 +585,48 @@ async function fetchMarketHistory({
     ].join("&");
 
     return fetchSupabase("api_market_history", query);
+}
+
+async function requestMarketHistoryLoad({
+    world,
+    itemId,
+    days
+}) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        throw new Error(
+            "Supabase URL or anon key is missing from config.js"
+        );
+    }
+
+    const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/load-market-history`,
+        {
+            method: "POST",
+
+            headers: {
+                apikey: SUPABASE_ANON_KEY,
+                Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                world,
+                item_id: itemId,
+                days
+            })
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+        throw new Error(
+            result.error ||
+            `Market history load failed with status ${response.status}.`
+        );
+    }
+
+    return result;
 }
 
 // ============================================================
@@ -1729,16 +1787,52 @@ async function loadMarketHistory() {
         return;
     }
 
-    marketStatusElement.textContent = "Loading market history...";
     applyMarketFilterButton.disabled = true;
+    marketStatusElement.textContent = "Loading market history...";
 
     try {
-        const rows = await fetchMarketHistory({
+        let rows = await fetchMarketHistory({
             world,
             itemId: selectedMarketItem.itemId,
             startDate,
             endDate
         });
+
+        /*
+         * If no rows exist for this world/item/date combination,
+         * ask the Edge Function to retrieve and cache the history.
+         */
+        if (rows.length === 0) {
+            const days = calculateMarketHistoryDays(startDate);
+
+            marketStatusElement.textContent =
+                "Market history is not cached yet. Loading data from TibiaMarket...";
+
+            const loadResult = await requestMarketHistoryLoad({
+                world,
+                itemId: selectedMarketItem.itemId,
+                days
+            });
+
+            console.log(
+                "Market history load result:",
+                loadResult
+            );
+
+            marketStatusElement.textContent =
+                "Market history loaded. Refreshing the chart...";
+
+            /*
+             * Query the REST view again after the Edge Function
+             * has inserted the observations into Supabase.
+             */
+            rows = await fetchMarketHistory({
+                world,
+                itemId: selectedMarketItem.itemId,
+                startDate,
+                endDate
+            });
+        }
 
         marketHistoryData = rows;
 
@@ -1748,12 +1842,17 @@ async function loadMarketHistory() {
 
         marketStatusElement.textContent = rows.length
             ? `${selectedMarketItem.itemName} market history loaded successfully.`
-            : "No observations were found for the selected filters.";
+            : "TibiaMarket has no valid observations for this item, world, and date range.";
     } catch (error) {
-        console.error("Unable to load market history:", error);
+        console.error(
+            "Unable to load market history:",
+            error
+        );
 
         marketStatusElement.textContent =
-            "Unable to load market history.";
+            error instanceof Error
+                ? error.message
+                : "Unable to load market history.";
 
         marketHistoryData = [];
 

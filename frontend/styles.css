@@ -723,3 +723,8 @@ td {
         width: 100%;
     }
 }
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
